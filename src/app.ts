@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import sendResponse from "./utils/sendResponse.js";
 
 const app = express();
 
@@ -22,7 +23,8 @@ const limiter = rateLimit({
 app.use(limiter);
 
 app.get("/", (_req, res) => {
-  res.status(200).json({
+  sendResponse(res, {
+    statusCode: 200,
     success: true,
     message: "DevAssess API is running",
     data: {},
