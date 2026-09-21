@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import sendResponse from "./utils/sendResponse.js";
+import globalErrorHandler from "./middleware/globalErrorHandler.js";
 
 const app = express();
 
@@ -30,5 +31,8 @@ app.get("/", (_req, res) => {
     data: {},
   });
 });
+
+// Global error handler must be registered after all routes
+app.use(globalErrorHandler);
 
 export default app;
