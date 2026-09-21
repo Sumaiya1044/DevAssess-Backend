@@ -109,7 +109,7 @@ model Assessment {
   description     String?
   durationMinutes Int
   status          AssessmentStatus           @default(DRAFT)
-  price           Decimal                    @default(0)
+  price           Decimal                    @default("0")
 
   companyId       Int
   company         Company                    @relation(fields:[companyId], references:[id])
@@ -219,7 +219,7 @@ model Submission {
   answer      Json?
   code        String?
   language    String?
-  score       Decimal            @default(0)
+  score       Decimal            @default("0")
   status      SubmissionStatus   @default(PENDING)
   feedback    String?
 
@@ -242,9 +242,9 @@ model Submission {
 
 model Result {
   id         Int                        @id @default(autoincrement())
-  totalScore Decimal                    @default(0)
-  maxScore   Decimal                    @default(0)
-  percentage Decimal                    @default(0)
+  totalScore Decimal                    @default("0")
+  maxScore   Decimal                    @default("0")
+  percentage Decimal                    @default("0")
   passed     Boolean                    @default(false)
 
   attemptId  Int                        @unique

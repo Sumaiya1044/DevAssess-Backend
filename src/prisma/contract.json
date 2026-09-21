@@ -1992,7 +1992,7 @@
                   "codecId": "pg/numeric@1",
                   "default": {
                     "kind": "literal",
-                    "value": 0
+                    "value": "0"
                   },
                   "nativeType": "numeric",
                   "nullable": false
@@ -3042,7 +3042,7 @@
                   "codecId": "pg/numeric@1",
                   "default": {
                     "kind": "literal",
-                    "value": 0
+                    "value": "0"
                   },
                   "nativeType": "numeric",
                   "nullable": false
@@ -3060,7 +3060,7 @@
                   "codecId": "pg/numeric@1",
                   "default": {
                     "kind": "literal",
-                    "value": 0
+                    "value": "0"
                   },
                   "nativeType": "numeric",
                   "nullable": false
@@ -3069,7 +3069,7 @@
                   "codecId": "pg/numeric@1",
                   "default": {
                     "kind": "literal",
-                    "value": 0
+                    "value": "0"
                   },
                   "nativeType": "numeric",
                   "nullable": false
@@ -3191,7 +3191,7 @@
                   "codecId": "pg/numeric@1",
                   "default": {
                     "kind": "literal",
-                    "value": 0
+                    "value": "0"
                   },
                   "nativeType": "numeric",
                   "nullable": false
@@ -3542,7 +3542,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "c59035181f2d76832b8800254cdb69e30cbc8c38f57212dfdc8c448d937a7d83"
+    "storageHash": "1df3c87349b39fd6679ae7b6dc93bf5d853aba5fbe5df16356bc85726d1205fe"
   },
   "execution": {
     "executionHash": "9b0df2ddc974a00ff51e3447c169ded98248b88412ec7fd23e2b251390138210",
