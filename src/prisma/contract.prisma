@@ -1,21 +1,304 @@
 // use prisma-8
-
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String?
-  name      String?
-  posts     Post[]
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+enum UserRole {
+  ADMIN
+  COMPANY
+  CANDIDATE
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String?
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum AssessmentStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  ARCHIVED
+}
+
+enum ProblemType {
+  MCQ
+  CODING
+  WRITTEN
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum AttemptStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  SUBMITTED
+  EXPIRED
+}
+
+enum SubmissionStatus {
+  PENDING
+  EVALUATED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  STRIPE
+  BKASH
+  SSLCOMMERZ
+}
+
+model User {
+  id          Int                        @id @default(autoincrement())
+  email       String                     @unique
+  password    String?
+  name        String
+  role        UserRole                   @default(CANDIDATE)
+  status      UserStatus                 @default(ACTIVE)
+  googleId    String?                    @unique
+  phone       String?
+
+  company     Company?
+  assessments Assessment[]               @relation("AssessmentCreator")
+  invitations Invitation[]
+  attempts    Attempt[]
+  submissions Submission[]
+  payments    Payment[]
+  auditLogs   AuditLog[]
+
+  createdAt   TimestamptzString          @default(now())
+  updatedAt   temporal.updatedAtString()
+
+  @@index([role])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Company {
+  id          Int                        @id @default(autoincrement())
+  name        String
+  description String?
+  website     String?
+  industry    String?
+  logo        String?
+
+  ownerId     Int                        @unique
+  owner       User                       @relation(fields:[ownerId], references:[id])
+
+  assessments Assessment[]
+
+  createdAt   TimestamptzString          @default(now())
+  updatedAt   temporal.updatedAtString()
+
+  @@index([name])
+}
+
+model Assessment {
+  id              Int                        @id @default(autoincrement())
+  title           String
+  description     String?
+  durationMinutes Int
+  status          AssessmentStatus           @default(DRAFT)
+  price           Decimal                    @default(0)
+
+  companyId       Int
+  company         Company                    @relation(fields:[companyId], references:[id])
+
+  createdById     Int
+  createdBy       User                       @relation("AssessmentCreator", fields:[createdById], references:[id])
+
+  problems        AssessmentProblem[]
+  invitations     Invitation[]
+  attempts        Attempt[]
+  payments        Payment[]
+
+  publishedAt     TimestamptzString?
+  createdAt       TimestamptzString          @default(now())
+  updatedAt       temporal.updatedAtString()
+
+  @@index([companyId])
+  @@index([createdById])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Problem {
+  id            Int                        @id @default(autoincrement())
+  title         String
+  description   String
+  type          ProblemType
+  points        Int                        @default(1)
+
+  options       Json?
+  correctAnswer Json?
+  testCases     Json?
+  solution      String?
+
+  assessments   AssessmentProblem[]
+  submissions   Submission[]
+
+  createdAt     TimestamptzString          @default(now())
+  updatedAt     temporal.updatedAtString()
+
+  @@index([type])
+  @@index([createdAt])
+}
+
+model AssessmentProblem {
+  id           Int        @id @default(autoincrement())
+  assessmentId Int
+  problemId    Int
+  order        Int
+
+  assessment   Assessment @relation(fields:[assessmentId], references:[id])
+  problem      Problem    @relation(fields:[problemId], references:[id])
+
+  @@unique([assessmentId, problemId])
+  @@unique([assessmentId, order])
+  @@index([problemId])
+}
+
+model Invitation {
+  id           Int                        @id @default(autoincrement())
+  status       InvitationStatus           @default(PENDING)
+  expiresAt    TimestamptzString?
+
+  assessmentId Int
+  candidateId  Int
+
+  assessment   Assessment                 @relation(fields:[assessmentId], references:[id])
+  candidate    User                       @relation(fields:[candidateId], references:[id])
+
+  createdAt    TimestamptzString          @default(now())
+  updatedAt    temporal.updatedAtString()
+
+  @@unique([assessmentId, candidateId])
+  @@index([candidateId])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+model Attempt {
+  id           Int                        @id @default(autoincrement())
+  status       AttemptStatus              @default(NOT_STARTED)
+
+  startedAt    TimestamptzString?
+  submittedAt  TimestamptzString?
+  expiresAt    TimestamptzString?
+
+  assessmentId Int
+  candidateId  Int
+
+  assessment   Assessment                 @relation(fields:[assessmentId], references:[id])
+  candidate    User                       @relation(fields:[candidateId], references:[id])
+
+  submissions  Submission[]
+  result       Result?
+
+  createdAt    TimestamptzString          @default(now())
+  updatedAt    temporal.updatedAtString()
+
+  @@unique([assessmentId, candidateId])
+  @@index([candidateId])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+model Submission {
+  id          Int                @id @default(autoincrement())
+  answer      Json?
+  code        String?
+  language    String?
+  score       Decimal            @default(0)
+  status      SubmissionStatus   @default(PENDING)
+  feedback    String?
+
+  attemptId   Int
+  problemId   Int
+  candidateId Int
+
+  attempt     Attempt            @relation(fields:[attemptId], references:[id])
+  problem     Problem            @relation(fields:[problemId], references:[id])
+  candidate   User               @relation(fields:[candidateId], references:[id])
+
+  submittedAt TimestamptzString  @default(now())
+  evaluatedAt TimestamptzString?
+
+  @@unique([attemptId, problemId])
+  @@index([problemId])
+  @@index([candidateId])
+  @@index([status])
+}
+
+model Result {
+  id         Int                        @id @default(autoincrement())
+  totalScore Decimal                    @default(0)
+  maxScore   Decimal                    @default(0)
+  percentage Decimal                    @default(0)
+  passed     Boolean                    @default(false)
+
+  attemptId  Int                        @unique
+  attempt    Attempt                    @relation(fields:[attemptId], references:[id])
+
+  createdAt  TimestamptzString          @default(now())
+  updatedAt  temporal.updatedAtString()
+
+  @@index([percentage])
+  @@index([passed])
+}
+
+model Payment {
+  id               Int                        @id @default(autoincrement())
+  amount           Decimal
+  currency         String                     @default("BDT")
+  status           PaymentStatus              @default(PENDING)
+  method           PaymentMethod
+
+  transactionId    String                     @unique
+  gatewaySessionId String?                    @unique
+
+  userId           Int
+  assessmentId     Int?
+
+  user             User                       @relation(fields:[userId], references:[id])
+  assessment       Assessment?                @relation(fields:[assessmentId], references:[id])
+
+  paidAt           TimestamptzString?
+  createdAt        TimestamptzString          @default(now())
+  updatedAt        temporal.updatedAtString()
+
+  @@index([userId])
+  @@index([assessmentId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id        Int               @id @default(autoincrement())
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  ipAddress String?
+  userAgent String?
+
+  userId    Int?
+  user      User?             @relation(fields:[userId], references:[id])
+
   createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([action])
+  @@index([createdAt])
 }
