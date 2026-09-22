@@ -65,7 +65,22 @@ const loginUser = async (payload: {
   };
 };
 
+const getMe = async (userId: number) => {
+  const user = await db.orm.public.User.first({
+    id: userId,
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const { password: _password, ...safeUser } = user;
+
+  return safeUser;
+};
+
 export const AuthServices = {
   registerUser,
   loginUser,
+  getMe,
 };
