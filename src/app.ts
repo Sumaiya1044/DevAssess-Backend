@@ -32,7 +32,6 @@ app.get("/", (_req, res) => {
   });
 });
 
-// Global error handler must be registered after all routes
 app.use(globalErrorHandler);
 
 export default app;
