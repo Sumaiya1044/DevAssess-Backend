@@ -4,6 +4,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import sendResponse from "./utils/sendResponse.js";
 import globalErrorHandler from "./middleware/globalErrorHandler.js";
+import authRoutes from "./routes/auth.routes.js";
 
 const app = express();
 
@@ -31,6 +32,8 @@ app.get("/", (_req, res) => {
     data: {},
   });
 });
+
+app.use("/api/v1/auth", authRoutes);
 
 app.use(globalErrorHandler);
 
