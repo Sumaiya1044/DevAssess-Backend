@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import { db } from "../../prisma/db.js";
+import createAccessToken from "../../utils/jwt.js";
 
 const registerUser = async (payload: {
   name: string;
@@ -50,9 +51,18 @@ const loginUser = async (payload: {
     throw new Error("Invalid email or password");
   }
 
+  const accessToken = createAccessToken({
+    id: user.id,
+    email: user.email,
+    role: user.role,
+  });
+
   const { password: _password, ...safeUser } = user;
 
-  return safeUser;
+  return {
+    user: safeUser,
+    accessToken,
+  };
 };
 
 export const AuthServices = {
