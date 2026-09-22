@@ -5,6 +5,7 @@ const registerUser = async (payload: {
   name: string;
   email: string;
   password: string;
+  phone?: string;
 }) => {
   const existingUser = await db.orm.public.User.first({
     email: payload.email,
@@ -20,9 +21,12 @@ const registerUser = async (payload: {
     name: payload.name,
     email: payload.email,
     password: hashedPassword,
+    phone: payload.phone,
   });
 
-  return user;
+  const { password: _password, ...safeUser } = user;
+
+  return safeUser;
 };
 
 const loginUser = async (payload: {
@@ -46,7 +50,9 @@ const loginUser = async (payload: {
     throw new Error("Invalid email or password");
   }
 
-  return user;
+  const { password: _password, ...safeUser } = user;
+
+  return safeUser;
 };
 
 export const AuthServices = {
