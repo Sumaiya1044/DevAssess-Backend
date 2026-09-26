@@ -1,145 +1,105 @@
 import bcrypt from "bcrypt";
-import { OAuth2Client } from "google-auth-library";
-import { db } from "../../prisma/db.js";
+import pool from "../../config/db.js";
 import createAccessToken from "../../utils/jwt.js";
+import AppError from "../../utils/AppError.js";
 
-const registerUser = async (payload: {
+type UserRole = "contributor" | "maintainer";
+
+interface RegisterPayload {
   name: string;
   email: string;
   password: string;
-  phone?: string;
-}) => {
-  const existingUser = await db.orm.public.User.first({
-    email: payload.email,
-  });
+  role?: UserRole;
+}
 
-  if (existingUser) {
-    throw new Error("User already exists");
+interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+const registerUser = async (payload: RegisterPayload) => {
+  const existingUser = await pool.query<{ id: number }>(
+    "SELECT id FROM users WHERE email = $1 LIMIT 1",
+    [payload.email],
+  );
+
+  if (existingUser.rows.length > 0) {
+    throw new AppError(400, "User already exists");
   }
 
   const hashedPassword = await bcrypt.hash(payload.password, 10);
+  const role: UserRole = payload.role ?? "contributor";
 
-  const user = await db.orm.public.User.create({
-    name: payload.name,
-    email: payload.email,
-    password: hashedPassword,
-    phone: payload.phone,
-  });
+  try {
+    const result = await pool.query(
+      `INSERT INTO users (name, email, password, role)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, name, email, role, created_at, updated_at`,
+      [payload.name, payload.email, hashedPassword, role],
+    );
 
-  const { password: _password, ...safeUser } = user;
+    return result.rows[0];
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "23505"
+    ) {
+      throw new AppError(400, "User already exists");
+    }
 
-  return safeUser;
+    throw error;
+  }
 };
 
-const loginUser = async (payload: {
-  email: string;
-  password: string;
-}) => {
-  const user = await db.orm.public.User.first({
-    email: payload.email,
-  });
+const loginUser = async (payload: LoginPayload) => {
+  const result = await pool.query<{
+    id: number;
+    name: string;
+    email: string;
+    password: string;
+    role: UserRole;
+    created_at: string;
+    updated_at: string;
+  }>(
+    `SELECT id, name, email, password, role, created_at, updated_at
+     FROM users
+     WHERE email = $1
+     LIMIT 1`,
+    [payload.email],
+  );
 
-  if (!user || !user.password) {
-    throw new Error("Invalid email or password");
+  if (result.rows.length === 0) {
+    throw new AppError(401, "Invalid email or password");
   }
 
-  const isPasswordMatched = await bcrypt.compare(
+  const user = result.rows[0];
+
+  const passwordMatched = await bcrypt.compare(
     payload.password,
     user.password,
   );
 
-  if (!isPasswordMatched) {
-    throw new Error("Invalid email or password");
+  if (!passwordMatched) {
+    throw new AppError(401, "Invalid email or password");
   }
 
-  const accessToken = createAccessToken({
+  const token = createAccessToken({
     id: user.id,
-    email: user.email,
+    name: user.name,
     role: user.role,
   });
 
   const { password: _password, ...safeUser } = user;
 
   return {
+    token,
     user: safeUser,
-    accessToken,
-  };
-};
-
-const getMe = async (userId: number) => {
-  const user = await db.orm.public.User.first({
-    id: userId,
-  });
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  const { password: _password, ...safeUser } = user;
-
-  return safeUser;
-};
-
-const googleLogin = async (idToken: string) => {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-
-  if (!clientId) {
-    throw new Error("GOOGLE_CLIENT_ID is not configured");
-  }
-
-  const googleClient = new OAuth2Client();
-
-  const ticket = await googleClient.verifyIdToken({
-    idToken,
-    audience: clientId,
-  });
-
-  const payload = ticket.getPayload();
-
-  if (!payload?.sub || !payload.email) {
-    throw new Error("Invalid Google account information");
-  }
-
-  const googleId = payload.sub;
-  const email = payload.email;
-  const name = payload.name || email.split("@")[0];
-
-  let user = await db.orm.public.User.first({
-    googleId,
-  });
-
-  if (!user) {
-    user = await db.orm.public.User.first({
-      email,
-    });
-  }
-
-  if (!user) {
-    user = await db.orm.public.User.create({
-      name,
-      email,
-      googleId,
-      password: null,
-    });
-  }
-
-  const accessToken = createAccessToken({
-    id: user.id,
-    email: user.email,
-    role: user.role,
-  });
-
-  const { password: _password, ...safeUser } = user;
-
-  return {
-    user: safeUser,
-    accessToken,
   };
 };
 
 export const AuthServices = {
   registerUser,
   loginUser,
-  getMe,
-  googleLogin,
 };

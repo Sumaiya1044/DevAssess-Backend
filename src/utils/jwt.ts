@@ -1,9 +1,11 @@
 import jwt, { SignOptions } from "jsonwebtoken";
 
+type UserRole = "contributor" | "maintainer";
+
 interface JwtPayload {
   id: number;
-  email: string;
-  role: string;
+  name: string;
+  role: UserRole;
 }
 
 const createAccessToken = (payload: JwtPayload): string => {

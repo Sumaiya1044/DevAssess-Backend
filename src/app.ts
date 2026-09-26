@@ -5,11 +5,14 @@ import rateLimit from "express-rate-limit";
 import sendResponse from "./utils/sendResponse.js";
 import globalErrorHandler from "./middleware/globalErrorHandler.js";
 import authRoutes from "./routes/auth.routes.js";
+import issuesRoutes from "./routes/issues.routes.js";
 
 const app = express();
 
 app.use(helmet());
+
 app.use(cors());
+
 app.use(express.json());
 
 const limiter = rateLimit({
@@ -33,7 +36,9 @@ app.get("/", (_req, res) => {
   });
 });
 
-app.use("/api/v1/auth", authRoutes);
+app.use("/api/auth", authRoutes);
+
+app.use("/api/issues", issuesRoutes);
 
 app.use(globalErrorHandler);
 

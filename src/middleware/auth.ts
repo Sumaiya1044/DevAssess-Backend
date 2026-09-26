@@ -1,10 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
+export type UserRole = "contributor" | "maintainer";
+
 export interface AuthUser {
   id: number;
-  email: string;
-  role: string;
+  name: string;
+  role: UserRole;
 }
 
 export interface AuthenticatedRequest extends Request {
@@ -19,15 +21,18 @@ const auth = (
   try {
     const authorization = req.headers.authorization;
 
-    if (!authorization || !authorization.startsWith("Bearer ")) {
+    if (!authorization) {
       return res.status(401).json({
         success: false,
-        message: "Authentication token is required",
+        message: "Unauthorized",
         errors: [],
       });
     }
 
-    const token = authorization.split(" ")[1];
+    const token = authorization.startsWith("Bearer ")
+      ? authorization.slice(7)
+      : authorization;
+
     const secret = process.env.JWT_ACCESS_SECRET;
 
     if (!secret) {
@@ -40,8 +45,8 @@ const auth = (
       typeof decoded !== "object" ||
       decoded === null ||
       typeof decoded.id !== "number" ||
-      typeof decoded.email !== "string" ||
-      typeof decoded.role !== "string"
+      typeof decoded.name !== "string" ||
+      (decoded.role !== "contributor" && decoded.role !== "maintainer")
     ) {
       return res.status(401).json({
         success: false,
@@ -52,15 +57,15 @@ const auth = (
 
     req.user = {
       id: decoded.id,
-      email: decoded.email,
+      name: decoded.name,
       role: decoded.role,
     };
 
     next();
-  } catch (_error) {
+  } catch {
     return res.status(401).json({
       success: false,
-      message: "Invalid or expired authentication token",
+      message: "Invalid or expired JWT token",
       errors: [],
     });
   }

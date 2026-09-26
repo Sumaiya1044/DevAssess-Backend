@@ -1,9 +1,10 @@
 import { NextFunction, Response } from "express";
 import {
   AuthenticatedRequest,
+  UserRole,
 } from "./auth.js";
 
-const authorize = (...allowedRoles: string[]) => {
+const authorize = (...allowedRoles: UserRole[]) => {
   return (
     req: AuthenticatedRequest,
     res: Response,
@@ -12,7 +13,7 @@ const authorize = (...allowedRoles: string[]) => {
     if (!req.user) {
       return res.status(401).json({
         success: false,
-        message: "Authentication required",
+        message: "Unauthorized",
         errors: [],
       });
     }
@@ -20,7 +21,7 @@ const authorize = (...allowedRoles: string[]) => {
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: "You do not have permission to access this resource",
+        message: "Forbidden",
         errors: [],
       });
     }

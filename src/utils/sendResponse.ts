@@ -6,19 +6,24 @@ interface SendResponseOptions<T> {
   message: string;
   data?: T;
   errors?: unknown[];
+  includeData?: boolean;
 }
 
 const sendResponse = <T>(
   res: Response,
   options: SendResponseOptions<T>,
 ): Response => {
-  return res.status(options.statusCode).json({
+  const response = {
     success: options.success,
     message: options.message,
     ...(options.success
-      ? { data: options.data ?? {} }
+      ? options.includeData === false
+        ? {}
+        : { data: options.data ?? {} }
       : { errors: options.errors ?? [] }),
-  });
+  };
+
+  return res.status(options.statusCode).json(response);
 };
 
 export default sendResponse;

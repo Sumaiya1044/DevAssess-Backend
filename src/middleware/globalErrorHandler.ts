@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import sendResponse from "../utils/sendResponse.js";
+import AppError from "../utils/AppError.js";
 
 const globalErrorHandler = (
   err: Error,
@@ -9,10 +10,19 @@ const globalErrorHandler = (
 ) => {
   console.error(err);
 
-  sendResponse(res, {
+  if (err instanceof AppError) {
+    return sendResponse(res, {
+      statusCode: err.statusCode,
+      success: false,
+      message: err.message,
+      errors: [],
+    });
+  }
+
+  return sendResponse(res, {
     statusCode: 500,
     success: false,
-    message: err.message || "Internal server error",
+    message: "Internal server error",
     errors: [],
   });
 };
