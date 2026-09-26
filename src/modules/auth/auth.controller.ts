@@ -25,6 +25,17 @@ const login = async (req: Request, res: Response) => {
   });
 };
 
+const googleLogin = async (req: Request, res: Response) => {
+  const result = await AuthServices.googleLogin(req.body.idToken);
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Google login successful",
+    data: result,
+  });
+};
+
 const getMe = async (req: AuthenticatedRequest, res: Response) => {
   const result = await AuthServices.getMe(req.user!.id);
 
@@ -39,5 +50,6 @@ const getMe = async (req: AuthenticatedRequest, res: Response) => {
 export const AuthControllers = {
   register,
   login,
+  googleLogin,
   getMe,
 };

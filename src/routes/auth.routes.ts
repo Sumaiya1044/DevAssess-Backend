@@ -5,6 +5,7 @@ import auth from "../middleware/auth.js";
 import {
   registerSchema,
   loginSchema,
+  googleLoginSchema,
 } from "../modules/auth/auth.validation.js";
 
 const router = Router();
@@ -19,6 +20,12 @@ router.post(
   "/login",
   validateRequest(loginSchema),
   AuthControllers.login,
+);
+
+router.post(
+  "/google",
+  validateRequest(googleLoginSchema),
+  AuthControllers.googleLogin,
 );
 
 router.get("/me", auth, AuthControllers.getMe);
