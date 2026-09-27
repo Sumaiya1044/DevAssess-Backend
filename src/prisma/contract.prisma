@@ -1,0 +1,311 @@
+// use prisma-8
+
+enum UserRole {
+  ADMIN
+  COMPANY
+  CANDIDATE
+}
+
+enum AssessmentStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  ARCHIVED
+}
+
+enum QuestionType {
+  MCQ
+  WRITTEN
+  CODING
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum AttemptStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  SUBMITTED
+  EXPIRED
+}
+
+enum SubmissionStatus {
+  PENDING
+  EVALUATED
+}
+
+enum PaymentProvider {
+  STRIPE
+  BKASH
+  SSLCOMMERZ
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+model User {
+  id                  Int               @id @default(autoincrement())
+  email               String            @unique
+  passwordHash        String?
+  googleId            String?           @unique
+  name                String
+  role                UserRole          @default(CANDIDATE)
+  deletedAt           TimestamptzString?
+  createdAt           TimestamptzString @default(now())
+  updatedAt           temporal.updatedAtString()
+
+  companyProfile      Company?
+  candidateProfile    CandidateProfile?
+
+  assessmentsCreated  Assessment[]      @relation("AssessmentCreator")
+  questionsCreated    Question[]        @relation("QuestionCreator")
+
+  sentInvitations     Invitation[]      @relation("InvitationInviter")
+  receivedInvitations Invitation[]      @relation("InvitationCandidate")
+
+  attempts            Attempt[]
+  payments            Payment[]
+  refreshTokens       RefreshToken[]
+  auditLogs           AuditLog[]        @relation("AuditActor")
+
+  @@index([role])
+  @@index([deletedAt])
+  @@index([createdAt])
+}
+
+model Company {
+  id          Int               @id @default(autoincrement())
+  ownerId     Int               @unique
+  name        String
+  description String?
+  website     String?
+  deletedAt   TimestamptzString?
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+
+  owner       User              @relation(fields: [ownerId], references: [id])
+  assessments Assessment[]
+
+  @@index([name])
+  @@index([deletedAt])
+}
+
+model CandidateProfile {
+  id        Int               @id @default(autoincrement())
+  userId    Int               @unique
+  bio       String?
+  skills    String?
+  resumeUrl String?
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.updatedAtString()
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Assessment {
+  id             Int               @id @default(autoincrement())
+  companyId      Int
+  createdById    Int
+  title          String
+  description    String?
+  status         AssessmentStatus  @default(DRAFT)
+  durationMinutes Int
+  passingScore   Float?
+  maxAttempts    Int               @default(1)
+  publishedAt    TimestamptzString?
+  startsAt       TimestamptzString?
+  endsAt         TimestamptzString?
+  deletedAt      TimestamptzString?
+  createdAt      TimestamptzString  @default(now())
+  updatedAt      temporal.updatedAtString()
+
+  company        Company            @relation(fields: [companyId], references: [id])
+  createdBy      User               @relation("AssessmentCreator", fields: [createdById], references: [id])
+  questions      AssessmentQuestion[]
+  invitations    Invitation[]
+  attempts       Attempt[]
+  payments       Payment[]
+
+  @@index([companyId])
+  @@index([createdById])
+  @@index([status, createdAt])
+  @@index([deletedAt])
+}
+
+model Question {
+  id           Int               @id @default(autoincrement())
+  companyId    Int
+  createdById  Int
+  type         QuestionType
+  title        String
+  description  String
+  marks        Int               @default(1)
+  options      Json?
+  expectedAnswer Json?
+  deletedAt    TimestamptzString?
+  createdAt    TimestamptzString @default(now())
+  updatedAt    temporal.updatedAtString()
+
+  company      Company           @relation(fields: [companyId], references: [id])
+  createdBy    User              @relation("QuestionCreator", fields: [createdById], references: [id])
+  assessments  AssessmentQuestion[]
+  submissions  Submission[]
+
+  @@index([companyId])
+  @@index([createdById])
+  @@index([type])
+  @@index([deletedAt])
+  @@index([createdAt])
+}
+
+model AssessmentQuestion {
+  id           Int          @id @default(autoincrement())
+  assessmentId Int
+  questionId  Int
+  position     Int
+  marksOverride Int?
+
+  assessment   Assessment   @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  question     Question     @relation(fields: [questionId], references: [id])
+
+  submissions  Submission[]
+
+  @@unique([assessmentId, questionId])
+  @@unique([assessmentId, position])
+  @@index([assessmentId, position])
+}
+
+model Invitation {
+  id           Int                @id @default(autoincrement())
+  assessmentId Int
+  candidateId  Int
+  invitedById  Int
+  status       InvitationStatus   @default(PENDING)
+  expiresAt    TimestamptzString?
+  respondedAt  TimestamptzString?
+  createdAt    TimestamptzString  @default(now())
+  updatedAt    temporal.updatedAtString()
+
+  assessment   Assessment         @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  candidate    User               @relation("InvitationCandidate", fields: [candidateId], references: [id])
+  invitedBy    User               @relation("InvitationInviter", fields: [invitedById], references: [id])
+
+  @@unique([assessmentId, candidateId])
+  @@index([candidateId, status])
+  @@index([assessmentId, status])
+}
+
+model Attempt {
+  id            Int            @id @default(autoincrement())
+  assessmentId  Int
+  candidateId   Int
+  attemptNumber Int            @default(1)
+  status        AttemptStatus  @default(NOT_STARTED)
+  startedAt     TimestamptzString?
+  expiresAt     TimestamptzString?
+  submittedAt   TimestamptzString?
+  score         Float?
+  createdAt     TimestamptzString @default(now())
+  updatedAt     temporal.updatedAtString()
+
+  assessment    Assessment     @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  candidate     User           @relation(fields: [candidateId], references: [id])
+  submissions   Submission[]
+
+  @@unique([assessmentId, candidateId, attemptNumber])
+  @@index([candidateId, status])
+  @@index([assessmentId, status])
+  @@index([createdAt])
+}
+
+model Submission {
+  id                  Int                @id @default(autoincrement())
+  attemptId           Int
+  assessmentQuestionId Int
+  questionId          Int
+  answer              Json?
+  code                String?
+  language            String?
+  score               Float?
+  feedback            String?
+  status              SubmissionStatus  @default(PENDING)
+  submittedAt         TimestamptzString @default(now())
+  evaluatedAt         TimestamptzString?
+  createdAt            TimestamptzString @default(now())
+  updatedAt           temporal.updatedAtString()
+
+  attempt             Attempt            @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  assessmentQuestion  AssessmentQuestion @relation(fields: [assessmentQuestionId], references: [id], onDelete: Cascade)
+  question            Question           @relation(fields: [questionId], references: [id])
+
+  @@unique([attemptId, assessmentQuestionId])
+  @@index([attemptId])
+  @@index([questionId])
+  @@index([status])
+}
+
+model Payment {
+  id                Int               @id @default(autoincrement())
+  userId            Int
+  assessmentId      Int?
+  provider          PaymentProvider
+  status            PaymentStatus     @default(PENDING)
+  amountInMinorUnit Int
+  currency          String            @default("BDT")
+  transactionId     String            @unique
+  providerSessionId String?           @unique
+  providerPaymentId String?
+  metadata          Json?
+  paidAt            TimestamptzString?
+  createdAt         TimestamptzString @default(now())
+  updatedAt         temporal.updatedAtString()
+
+  user              User              @relation(fields: [userId], references: [id])
+  assessment        Assessment?       @relation(fields: [assessmentId], references: [id])
+
+  @@index([userId, status])
+  @@index([assessmentId])
+  @@index([provider, status])
+  @@index([createdAt])
+}
+
+model RefreshToken {
+  id        Int               @id @default(autoincrement())
+  userId    Int
+  tokenHash String            @unique
+  expiresAt TimestamptzString
+  revokedAt TimestamptzString?
+  createdAt TimestamptzString @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+}
+
+model AuditLog {
+  id         Int               @id @default(autoincrement())
+  actorId    Int?
+  action     String
+  entityType String
+  entityId   Int?
+  metadata   Json?
+  ipAddress  String?
+  createdAt  TimestamptzString @default(now())
+
+  actor User? @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([action, createdAt])
+  @@index([createdAt])
+}
