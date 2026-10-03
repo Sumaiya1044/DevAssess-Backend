@@ -1,0 +1,44 @@
+[
+  {
+    "id": "dropConstraint.attempt.attempt_assessmentId_candidateId_key",
+    "label": "Drop constraint \"attempt_assessmentId_candidateId_key\" on \"attempt\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "attempt_assessmentId_candidateId_key",
+        "table": "attempt"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"attempt_assessmentId_candidateId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "attempt_assessmentId_candidateId_key",
+          "public",
+          "\"public\".\"attempt\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"attempt_assessmentId_candidateId_key\"",
+        "sql": "ALTER TABLE \"public\".\"attempt\" DROP CONSTRAINT \"attempt_assessmentId_candidateId_key\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"attempt_assessmentId_candidateId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "attempt_assessmentId_candidateId_key",
+          "public",
+          "\"public\".\"attempt\""
+        ]
+      }
+    ]
+  }
+]
