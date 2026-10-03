@@ -4,51 +4,55 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
-    "Assessment": {
-      "model": "Assessment",
-      "namespace": "public"
-    },
-    "AssessmentQuestion": {
-      "model": "AssessmentQuestion",
-      "namespace": "public"
-    },
-    "Attempt": {
-      "model": "Attempt",
-      "namespace": "public"
-    },
-    "AuditLog": {
-      "model": "AuditLog",
-      "namespace": "public"
-    },
     "CandidateProfile": {
       "model": "CandidateProfile",
-      "namespace": "public"
-    },
-    "Company": {
-      "model": "Company",
-      "namespace": "public"
-    },
-    "Invitation": {
-      "model": "Invitation",
-      "namespace": "public"
-    },
-    "Payment": {
-      "model": "Payment",
-      "namespace": "public"
-    },
-    "Question": {
-      "model": "Question",
       "namespace": "public"
     },
     "RefreshToken": {
       "model": "RefreshToken",
       "namespace": "public"
     },
-    "Submission": {
+    "assessment": {
+      "model": "Assessment",
+      "namespace": "public"
+    },
+    "assessmentProblem": {
+      "model": "AssessmentQuestion",
+      "namespace": "public"
+    },
+    "attempt": {
+      "model": "Attempt",
+      "namespace": "public"
+    },
+    "auditLog": {
+      "model": "AuditLog",
+      "namespace": "public"
+    },
+    "company": {
+      "model": "Company",
+      "namespace": "public"
+    },
+    "invitation": {
+      "model": "Invitation",
+      "namespace": "public"
+    },
+    "payment": {
+      "model": "Payment",
+      "namespace": "public"
+    },
+    "problem": {
+      "model": "Question",
+      "namespace": "public"
+    },
+    "result": {
+      "model": "Result",
+      "namespace": "public"
+    },
+    "submission": {
       "model": "Submission",
       "namespace": "public"
     },
-    "User": {
+    "user": {
       "model": "User",
       "namespace": "public"
     }
@@ -189,6 +193,10 @@
               {
                 "name": "EVALUATED",
                 "value": "EVALUATED"
+              },
+              {
+                "name": "REJECTED",
+                "value": "REJECTED"
               }
             ]
           },
@@ -206,6 +214,23 @@
               {
                 "name": "CANDIDATE",
                 "value": "CANDIDATE"
+              }
+            ]
+          },
+          "UserStatus": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "ACTIVE",
+                "value": "ACTIVE"
+              },
+              {
+                "name": "BLOCKED",
+                "value": "BLOCKED"
+              },
+              {
+                "name": "DELETED",
+                "value": "DELETED"
               }
             ]
           }
@@ -278,6 +303,13 @@
               },
               "passingScore": {
                 "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "price": {
+                "nullable": false,
                 "type": {
                   "codecId": "pg/float8@1",
                   "kind": "scalar"
@@ -451,6 +483,9 @@
                 "passingScore": {
                   "column": "passingScore"
                 },
+                "price": {
+                  "column": "price"
+                },
                 "publishedAt": {
                   "column": "publishedAt"
                 },
@@ -468,7 +503,7 @@
                 }
               },
               "namespaceId": "public",
-              "table": "Assessment"
+              "table": "assessment"
             }
           },
           "AssessmentQuestion": {
@@ -570,14 +605,14 @@
                   "column": "marksOverride"
                 },
                 "position": {
-                  "column": "position"
+                  "column": "order"
                 },
                 "questionId": {
-                  "column": "questionId"
+                  "column": "problemId"
                 }
               },
               "namespaceId": "public",
-              "table": "AssessmentQuestion"
+              "table": "assessmentProblem"
             }
           },
           "Attempt": {
@@ -699,6 +734,22 @@
                   "namespace": "public"
                 }
               },
+              "result": {
+                "cardinality": "1:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "attemptId"
+                  ]
+                },
+                "to": {
+                  "model": "Result",
+                  "namespace": "public"
+                }
+              },
               "submissions": {
                 "cardinality": "1:N",
                 "on": {
@@ -752,7 +803,7 @@
                 }
               },
               "namespaceId": "public",
-              "table": "Attempt"
+              "table": "attempt"
             }
           },
           "AuditLog": {
@@ -781,7 +832,7 @@
               "entityId": {
                 "nullable": true,
                 "type": {
-                  "codecId": "pg/int4@1",
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
@@ -812,6 +863,13 @@
                   "codecId": "pg/json@1",
                   "kind": "scalar"
                 }
+              },
+              "userAgent": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
               }
             },
             "relations": {
@@ -838,7 +896,7 @@
                   "column": "action"
                 },
                 "actorId": {
-                  "column": "actorId"
+                  "column": "userId"
                 },
                 "createdAt": {
                   "column": "createdAt"
@@ -847,7 +905,7 @@
                   "column": "entityId"
                 },
                 "entityType": {
-                  "column": "entityType"
+                  "column": "entity"
                 },
                 "id": {
                   "column": "id"
@@ -857,10 +915,13 @@
                 },
                 "metadata": {
                   "column": "metadata"
+                },
+                "userAgent": {
+                  "column": "userAgent"
                 }
               },
               "namespaceId": "public",
-              "table": "AuditLog"
+              "table": "auditLog"
             }
           },
           "CandidateProfile": {
@@ -991,6 +1052,20 @@
                   "kind": "scalar"
                 }
               },
+              "industry": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "logo": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "name": {
                 "nullable": false,
                 "type": {
@@ -1051,6 +1126,21 @@
                   "model": "User",
                   "namespace": "public"
                 }
+              },
+              "questions": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "companyId"
+                  ]
+                },
+                "to": {
+                  "model": "Question",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -1067,6 +1157,12 @@
                 "id": {
                   "column": "id"
                 },
+                "industry": {
+                  "column": "industry"
+                },
+                "logo": {
+                  "column": "logo"
+                },
                 "name": {
                   "column": "name"
                 },
@@ -1081,7 +1177,7 @@
                 }
               },
               "namespaceId": "public",
-              "table": "Company"
+              "table": "company"
             }
           },
           "Invitation": {
@@ -1237,15 +1333,15 @@
                 }
               },
               "namespaceId": "public",
-              "table": "Invitation"
+              "table": "invitation"
             }
           },
           "Payment": {
             "fields": {
-              "amountInMinorUnit": {
+              "amount": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/int4@1",
+                  "codecId": "pg/float8@1",
                   "kind": "scalar"
                 }
               },
@@ -1389,8 +1485,8 @@
             },
             "storage": {
               "fields": {
-                "amountInMinorUnit": {
-                  "column": "amountInMinorUnit"
+                "amount": {
+                  "column": "amount"
                 },
                 "assessmentId": {
                   "column": "assessmentId"
@@ -1411,13 +1507,13 @@
                   "column": "paidAt"
                 },
                 "provider": {
-                  "column": "provider"
+                  "column": "method"
                 },
                 "providerPaymentId": {
                   "column": "providerPaymentId"
                 },
                 "providerSessionId": {
-                  "column": "providerSessionId"
+                  "column": "gatewaySessionId"
                 },
                 "status": {
                   "column": "status"
@@ -1433,7 +1529,7 @@
                 }
               },
               "namespaceId": "public",
-              "table": "Payment"
+              "table": "payment"
             }
           },
           "Question": {
@@ -1495,6 +1591,20 @@
                 }
               },
               "options": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/json@1",
+                  "kind": "scalar"
+                }
+              },
+              "solution": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "testCases": {
                 "nullable": true,
                 "type": {
                   "codecId": "pg/json@1",
@@ -1611,16 +1721,22 @@
                   "column": "description"
                 },
                 "expectedAnswer": {
-                  "column": "expectedAnswer"
+                  "column": "correctAnswer"
                 },
                 "id": {
                   "column": "id"
                 },
                 "marks": {
-                  "column": "marks"
+                  "column": "points"
                 },
                 "options": {
                   "column": "options"
+                },
+                "solution": {
+                  "column": "solution"
+                },
+                "testCases": {
+                  "column": "testCases"
                 },
                 "title": {
                   "column": "title"
@@ -1633,7 +1749,7 @@
                 }
               },
               "namespaceId": "public",
-              "table": "Question"
+              "table": "problem"
             }
           },
           "RefreshToken": {
@@ -1724,6 +1840,114 @@
               "table": "RefreshToken"
             }
           },
+          "Result": {
+            "fields": {
+              "attemptId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "maxScore": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "passed": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "percentage": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "totalScore": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "attempt": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "attemptId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Attempt",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "attemptId": {
+                  "column": "attemptId"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "maxScore": {
+                  "column": "maxScore"
+                },
+                "passed": {
+                  "column": "passed"
+                },
+                "percentage": {
+                  "column": "percentage"
+                },
+                "totalScore": {
+                  "column": "totalScore"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "result"
+            }
+          },
           "Submission": {
             "fields": {
               "answer": {
@@ -1741,6 +1965,13 @@
                 }
               },
               "attemptId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "candidateId": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/int4@1",
@@ -1892,6 +2123,9 @@
                 "attemptId": {
                   "column": "attemptId"
                 },
+                "candidateId": {
+                  "column": "candidateId"
+                },
                 "code": {
                   "column": "code"
                 },
@@ -1911,7 +2145,7 @@
                   "column": "language"
                 },
                 "questionId": {
-                  "column": "questionId"
+                  "column": "problemId"
                 },
                 "score": {
                   "column": "score"
@@ -1927,7 +2161,7 @@
                 }
               },
               "namespaceId": "public",
-              "table": "Submission"
+              "table": "submission"
             }
           },
           "User": {
@@ -1981,6 +2215,13 @@
                   "kind": "scalar"
                 }
               },
+              "phone": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "role": {
                 "nullable": false,
                 "type": {
@@ -1990,6 +2231,19 @@
                 "valueSet": {
                   "entityKind": "enum",
                   "entityName": "UserRole",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
+              "status": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "UserStatus",
                   "namespaceId": "public",
                   "plane": "domain"
                 }
@@ -2177,17 +2431,23 @@
                   "column": "name"
                 },
                 "passwordHash": {
-                  "column": "passwordHash"
+                  "column": "password"
+                },
+                "phone": {
+                  "column": "phone"
                 },
                 "role": {
                   "column": "role"
+                },
+                "status": {
+                  "column": "status"
                 },
                 "updatedAt": {
                   "column": "updatedAt"
                 }
               },
               "namespaceId": "public",
-              "table": "User"
+              "table": "user"
             }
           }
         }
@@ -2199,12 +2459,190 @@
       "public": {
         "entries": {
           "table": {
-            "Assessment": {
+            "CandidateProfile": {
+              "columns": {
+                "bio": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "resumeUrl": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "skills": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "userId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "userId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "CandidateProfile"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
+                  }
+                }
+              ],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "userId"
+                  ]
+                }
+              ]
+            },
+            "RefreshToken": {
+              "columns": {
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "expiresAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "revokedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "tokenHash": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "userId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "userId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "RefreshToken"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "expiresAt"
+                  ],
+                  "name": "RefreshToken_expiresAt_idx_6b6b8c10",
+                  "prefix": "RefreshToken_expiresAt_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "userId"
+                  ],
+                  "name": "RefreshToken_userId_idx_a489d58a",
+                  "prefix": "RefreshToken_userId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "userId",
+                    "revokedAt"
+                  ],
+                  "name": "RefreshToken_userId_revokedAt_idx_eae4cbef",
+                  "prefix": "RefreshToken_userId_revokedAt_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "tokenHash"
+                  ]
+                }
+              ]
+            },
+            "assessment": {
               "checks": [
                 {
                   "expression": "\"status\" IN ('DRAFT', 'PUBLISHED', 'CLOSED', 'ARCHIVED')",
-                  "name": "Assessment_status_check_aaf19bbb",
-                  "prefix": "Assessment_status_check"
+                  "name": "assessment_status_check_aaf19bbb",
+                  "prefix": "assessment_status_check"
                 }
               ],
               "columns": {
@@ -2270,6 +2708,15 @@
                   "nativeType": "float8",
                   "nullable": true
                 },
+                "price": {
+                  "codecId": "pg/float8@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "float8",
+                  "nullable": false
+                },
                 "publishedAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "nativeType": "timestamptz",
@@ -2313,14 +2760,14 @@
                       "companyId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Assessment"
+                    "tableName": "assessment"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Company"
+                    "tableName": "company"
                   }
                 },
                 {
@@ -2329,14 +2776,14 @@
                       "createdById"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Assessment"
+                    "tableName": "assessment"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "User"
+                    "tableName": "user"
                   }
                 }
               ],
@@ -2345,24 +2792,24 @@
                   "columns": [
                     "companyId"
                   ],
-                  "name": "Assessment_companyId_idx_33acc5ed",
-                  "prefix": "Assessment_companyId_idx",
+                  "name": "assessment_companyId_idx_33acc5ed",
+                  "prefix": "assessment_companyId_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "createdById"
                   ],
-                  "name": "Assessment_createdById_idx_8bf640ed",
-                  "prefix": "Assessment_createdById_idx",
+                  "name": "assessment_createdById_idx_8bf640ed",
+                  "prefix": "assessment_createdById_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "deletedAt"
                   ],
-                  "name": "Assessment_deletedAt_idx_a39f721c",
-                  "prefix": "Assessment_deletedAt_idx",
+                  "name": "assessment_deletedAt_idx_a39f721c",
+                  "prefix": "assessment_deletedAt_idx",
                   "unique": false
                 },
                 {
@@ -2370,8 +2817,8 @@
                     "status",
                     "createdAt"
                   ],
-                  "name": "Assessment_status_createdAt_idx_58610442",
-                  "prefix": "Assessment_status_createdAt_idx",
+                  "name": "assessment_status_createdAt_idx_58610442",
+                  "prefix": "assessment_status_createdAt_idx",
                   "unique": false
                 }
               ],
@@ -2382,7 +2829,7 @@
               },
               "uniques": []
             },
-            "AssessmentQuestion": {
+            "assessmentProblem": {
               "columns": {
                 "assessmentId": {
                   "codecId": "pg/int4@1",
@@ -2403,12 +2850,12 @@
                   "nativeType": "int4",
                   "nullable": true
                 },
-                "position": {
+                "order": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
                   "nullable": false
                 },
-                "questionId": {
+                "problemId": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
                   "nullable": false
@@ -2422,30 +2869,30 @@
                       "assessmentId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "AssessmentQuestion"
+                    "tableName": "assessmentProblem"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Assessment"
+                    "tableName": "assessment"
                   }
                 },
                 {
                   "source": {
                     "columns": [
-                      "questionId"
+                      "problemId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "AssessmentQuestion"
+                    "tableName": "assessmentProblem"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Question"
+                    "tableName": "problem"
                   }
                 }
               ],
@@ -2454,25 +2901,25 @@
                   "columns": [
                     "assessmentId"
                   ],
-                  "name": "AssessmentQuestion_assessmentId_idx_1fe05216",
-                  "prefix": "AssessmentQuestion_assessmentId_idx",
+                  "name": "assessmentProblem_assessmentId_idx_1fe05216",
+                  "prefix": "assessmentProblem_assessmentId_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "assessmentId",
-                    "position"
+                    "order"
                   ],
-                  "name": "AssessmentQuestion_assessmentId_position_idx_1f246eab",
-                  "prefix": "AssessmentQuestion_assessmentId_position_idx",
+                  "name": "assessmentProblem_assessmentId_order_idx_5a9bc1d4",
+                  "prefix": "assessmentProblem_assessmentId_order_idx",
                   "unique": false
                 },
                 {
                   "columns": [
-                    "questionId"
+                    "problemId"
                   ],
-                  "name": "AssessmentQuestion_questionId_idx_fdb42076",
-                  "prefix": "AssessmentQuestion_questionId_idx",
+                  "name": "assessmentProblem_problemId_idx_0024556d",
+                  "prefix": "assessmentProblem_problemId_idx",
                   "unique": false
                 }
               ],
@@ -2485,23 +2932,23 @@
                 {
                   "columns": [
                     "assessmentId",
-                    "questionId"
+                    "problemId"
                   ]
                 },
                 {
                   "columns": [
                     "assessmentId",
-                    "position"
+                    "order"
                   ]
                 }
               ]
             },
-            "Attempt": {
+            "attempt": {
               "checks": [
                 {
                   "expression": "\"status\" IN ('NOT_STARTED', 'IN_PROGRESS', 'SUBMITTED', 'EXPIRED')",
-                  "name": "Attempt_status_check_2037e2e4",
-                  "prefix": "Attempt_status_check"
+                  "name": "attempt_status_check_2037e2e4",
+                  "prefix": "attempt_status_check"
                 }
               ],
               "columns": {
@@ -2591,14 +3038,14 @@
                       "assessmentId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Attempt"
+                    "tableName": "attempt"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Assessment"
+                    "tableName": "assessment"
                   }
                 },
                 {
@@ -2607,14 +3054,14 @@
                       "candidateId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Attempt"
+                    "tableName": "attempt"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "User"
+                    "tableName": "user"
                   }
                 }
               ],
@@ -2623,8 +3070,8 @@
                   "columns": [
                     "assessmentId"
                   ],
-                  "name": "Attempt_assessmentId_idx_1fe05216",
-                  "prefix": "Attempt_assessmentId_idx",
+                  "name": "attempt_assessmentId_idx_1fe05216",
+                  "prefix": "attempt_assessmentId_idx",
                   "unique": false
                 },
                 {
@@ -2632,16 +3079,16 @@
                     "assessmentId",
                     "status"
                   ],
-                  "name": "Attempt_assessmentId_status_idx_e45a1f83",
-                  "prefix": "Attempt_assessmentId_status_idx",
+                  "name": "attempt_assessmentId_status_idx_e45a1f83",
+                  "prefix": "attempt_assessmentId_status_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "candidateId"
                   ],
-                  "name": "Attempt_candidateId_idx_462b5869",
-                  "prefix": "Attempt_candidateId_idx",
+                  "name": "attempt_candidateId_idx_462b5869",
+                  "prefix": "attempt_candidateId_idx",
                   "unique": false
                 },
                 {
@@ -2649,16 +3096,16 @@
                     "candidateId",
                     "status"
                   ],
-                  "name": "Attempt_candidateId_status_idx_df73ebcf",
-                  "prefix": "Attempt_candidateId_status_idx",
+                  "name": "attempt_candidateId_status_idx_df73ebcf",
+                  "prefix": "attempt_candidateId_status_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "createdAt"
                   ],
-                  "name": "Attempt_createdAt_idx_9575dbd7",
-                  "prefix": "Attempt_createdAt_idx",
+                  "name": "attempt_createdAt_idx_9575dbd7",
+                  "prefix": "attempt_createdAt_idx",
                   "unique": false
                 }
               ],
@@ -2677,17 +3124,12 @@
                 }
               ]
             },
-            "AuditLog": {
+            "auditLog": {
               "columns": {
                 "action": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
-                },
-                "actorId": {
-                  "codecId": "pg/int4@1",
-                  "nativeType": "int4",
-                  "nullable": true
                 },
                 "createdAt": {
                   "codecId": "pg/timestamptz-string@1",
@@ -2698,15 +3140,15 @@
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
-                "entityId": {
-                  "codecId": "pg/int4@1",
-                  "nativeType": "int4",
-                  "nullable": true
-                },
-                "entityType": {
+                "entity": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
+                },
+                "entityId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
                 },
                 "id": {
                   "codecId": "pg/int4@1",
@@ -2726,6 +3168,16 @@
                   "codecId": "pg/json@1",
                   "nativeType": "json",
                   "nullable": true
+                },
+                "userAgent": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "userId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
                 }
               },
               "foreignKeys": [
@@ -2733,17 +3185,17 @@
                   "onDelete": "setNull",
                   "source": {
                     "columns": [
-                      "actorId"
+                      "userId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "AuditLog"
+                    "tableName": "auditLog"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "User"
+                    "tableName": "user"
                   }
                 }
               ],
@@ -2753,33 +3205,33 @@
                     "action",
                     "createdAt"
                   ],
-                  "name": "AuditLog_action_createdAt_idx_a6d20b4b",
-                  "prefix": "AuditLog_action_createdAt_idx",
-                  "unique": false
-                },
-                {
-                  "columns": [
-                    "actorId"
-                  ],
-                  "name": "AuditLog_actorId_idx_a58f6b4b",
-                  "prefix": "AuditLog_actorId_idx",
+                  "name": "auditLog_action_createdAt_idx_a6d20b4b",
+                  "prefix": "auditLog_action_createdAt_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "createdAt"
                   ],
-                  "name": "AuditLog_createdAt_idx_9575dbd7",
-                  "prefix": "AuditLog_createdAt_idx",
+                  "name": "auditLog_createdAt_idx_9575dbd7",
+                  "prefix": "auditLog_createdAt_idx",
                   "unique": false
                 },
                 {
                   "columns": [
-                    "entityType",
+                    "entity",
                     "entityId"
                   ],
-                  "name": "AuditLog_entityType_entityId_idx_ea0fa809",
-                  "prefix": "AuditLog_entityType_entityId_idx",
+                  "name": "auditLog_entity_entityId_idx_efadd7fc",
+                  "prefix": "auditLog_entity_entityId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "userId"
+                  ],
+                  "name": "auditLog_userId_idx_a489d58a",
+                  "prefix": "auditLog_userId_idx",
                   "unique": false
                 }
               ],
@@ -2790,85 +3242,7 @@
               },
               "uniques": []
             },
-            "CandidateProfile": {
-              "columns": {
-                "bio": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": true
-                },
-                "createdAt": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "default": {
-                    "expression": "now()",
-                    "kind": "function"
-                  },
-                  "nativeType": "timestamptz",
-                  "nullable": false
-                },
-                "id": {
-                  "codecId": "pg/int4@1",
-                  "default": {
-                    "expression": "autoincrement()",
-                    "kind": "function"
-                  },
-                  "nativeType": "int4",
-                  "nullable": false
-                },
-                "resumeUrl": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": true
-                },
-                "skills": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": true
-                },
-                "updatedAt": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "nativeType": "timestamptz",
-                  "nullable": false
-                },
-                "userId": {
-                  "codecId": "pg/int4@1",
-                  "nativeType": "int4",
-                  "nullable": false
-                }
-              },
-              "foreignKeys": [
-                {
-                  "source": {
-                    "columns": [
-                      "userId"
-                    ],
-                    "namespaceId": "public",
-                    "tableName": "CandidateProfile"
-                  },
-                  "target": {
-                    "columns": [
-                      "id"
-                    ],
-                    "namespaceId": "public",
-                    "tableName": "User"
-                  }
-                }
-              ],
-              "indexes": [],
-              "primaryKey": {
-                "columns": [
-                  "id"
-                ]
-              },
-              "uniques": [
-                {
-                  "columns": [
-                    "userId"
-                  ]
-                }
-              ]
-            },
-            "Company": {
+            "company": {
               "columns": {
                 "createdAt": {
                   "codecId": "pg/timestamptz-string@1",
@@ -2898,6 +3272,16 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
+                "industry": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "logo": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "name": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -2926,14 +3310,14 @@
                       "ownerId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Company"
+                    "tableName": "company"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "User"
+                    "tableName": "user"
                   }
                 }
               ],
@@ -2942,16 +3326,16 @@
                   "columns": [
                     "deletedAt"
                   ],
-                  "name": "Company_deletedAt_idx_a39f721c",
-                  "prefix": "Company_deletedAt_idx",
+                  "name": "company_deletedAt_idx_a39f721c",
+                  "prefix": "company_deletedAt_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "name"
                   ],
-                  "name": "Company_name_idx_ce87e6ba",
-                  "prefix": "Company_name_idx",
+                  "name": "company_name_idx_ce87e6ba",
+                  "prefix": "company_name_idx",
                   "unique": false
                 }
               ],
@@ -2968,12 +3352,12 @@
                 }
               ]
             },
-            "Invitation": {
+            "invitation": {
               "checks": [
                 {
                   "expression": "\"status\" IN ('PENDING', 'ACCEPTED', 'DECLINED', 'EXPIRED')",
-                  "name": "Invitation_status_check_0fbd50ff",
-                  "prefix": "Invitation_status_check"
+                  "name": "invitation_status_check_0fbd50ff",
+                  "prefix": "invitation_status_check"
                 }
               ],
               "columns": {
@@ -3049,14 +3433,14 @@
                       "assessmentId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Invitation"
+                    "tableName": "invitation"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Assessment"
+                    "tableName": "assessment"
                   }
                 },
                 {
@@ -3065,14 +3449,14 @@
                       "candidateId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Invitation"
+                    "tableName": "invitation"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "User"
+                    "tableName": "user"
                   }
                 },
                 {
@@ -3081,14 +3465,14 @@
                       "invitedById"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Invitation"
+                    "tableName": "invitation"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "User"
+                    "tableName": "user"
                   }
                 }
               ],
@@ -3097,8 +3481,8 @@
                   "columns": [
                     "assessmentId"
                   ],
-                  "name": "Invitation_assessmentId_idx_1fe05216",
-                  "prefix": "Invitation_assessmentId_idx",
+                  "name": "invitation_assessmentId_idx_1fe05216",
+                  "prefix": "invitation_assessmentId_idx",
                   "unique": false
                 },
                 {
@@ -3106,16 +3490,16 @@
                     "assessmentId",
                     "status"
                   ],
-                  "name": "Invitation_assessmentId_status_idx_e45a1f83",
-                  "prefix": "Invitation_assessmentId_status_idx",
+                  "name": "invitation_assessmentId_status_idx_e45a1f83",
+                  "prefix": "invitation_assessmentId_status_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "candidateId"
                   ],
-                  "name": "Invitation_candidateId_idx_462b5869",
-                  "prefix": "Invitation_candidateId_idx",
+                  "name": "invitation_candidateId_idx_462b5869",
+                  "prefix": "invitation_candidateId_idx",
                   "unique": false
                 },
                 {
@@ -3123,16 +3507,16 @@
                     "candidateId",
                     "status"
                   ],
-                  "name": "Invitation_candidateId_status_idx_df73ebcf",
-                  "prefix": "Invitation_candidateId_status_idx",
+                  "name": "invitation_candidateId_status_idx_df73ebcf",
+                  "prefix": "invitation_candidateId_status_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "invitedById"
                   ],
-                  "name": "Invitation_invitedById_idx_61689f37",
-                  "prefix": "Invitation_invitedById_idx",
+                  "name": "invitation_invitedById_idx_61689f37",
+                  "prefix": "invitation_invitedById_idx",
                   "unique": false
                 }
               ],
@@ -3150,23 +3534,23 @@
                 }
               ]
             },
-            "Payment": {
+            "payment": {
               "checks": [
                 {
-                  "expression": "\"provider\" IN ('STRIPE', 'BKASH', 'SSLCOMMERZ')",
-                  "name": "Payment_provider_check_cd690f68",
-                  "prefix": "Payment_provider_check"
+                  "expression": "\"method\" IN ('STRIPE', 'BKASH', 'SSLCOMMERZ')",
+                  "name": "payment_method_check_c00d42fe",
+                  "prefix": "payment_method_check"
                 },
                 {
                   "expression": "\"status\" IN ('PENDING', 'PAID', 'FAILED', 'CANCELLED', 'REFUNDED')",
-                  "name": "Payment_status_check_f11e0b8c",
-                  "prefix": "Payment_status_check"
+                  "name": "payment_status_check_f11e0b8c",
+                  "prefix": "payment_status_check"
                 }
               ],
               "columns": {
-                "amountInMinorUnit": {
-                  "codecId": "pg/int4@1",
-                  "nativeType": "int4",
+                "amount": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
                   "nullable": false
                 },
                 "assessmentId": {
@@ -3192,6 +3576,11 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "gatewaySessionId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "id": {
                   "codecId": "pg/int4@1",
                   "default": {
@@ -3206,12 +3595,7 @@
                   "nativeType": "json",
                   "nullable": true
                 },
-                "paidAt": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "nativeType": "timestamptz",
-                  "nullable": true
-                },
-                "provider": {
+                "method": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false,
@@ -3222,12 +3606,12 @@
                     "plane": "storage"
                   }
                 },
-                "providerPaymentId": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
+                "paidAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
                   "nullable": true
                 },
-                "providerSessionId": {
+                "providerPaymentId": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": true
@@ -3270,14 +3654,14 @@
                       "userId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Payment"
+                    "tableName": "payment"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "User"
+                    "tableName": "user"
                   }
                 },
                 {
@@ -3286,14 +3670,14 @@
                       "assessmentId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Payment"
+                    "tableName": "payment"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Assessment"
+                    "tableName": "assessment"
                   }
                 }
               ],
@@ -3302,33 +3686,33 @@
                   "columns": [
                     "assessmentId"
                   ],
-                  "name": "Payment_assessmentId_idx_1fe05216",
-                  "prefix": "Payment_assessmentId_idx",
+                  "name": "payment_assessmentId_idx_1fe05216",
+                  "prefix": "payment_assessmentId_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "createdAt"
                   ],
-                  "name": "Payment_createdAt_idx_9575dbd7",
-                  "prefix": "Payment_createdAt_idx",
+                  "name": "payment_createdAt_idx_9575dbd7",
+                  "prefix": "payment_createdAt_idx",
                   "unique": false
                 },
                 {
                   "columns": [
-                    "provider",
+                    "method",
                     "status"
                   ],
-                  "name": "Payment_provider_status_idx_a4835fbc",
-                  "prefix": "Payment_provider_status_idx",
+                  "name": "payment_method_status_idx_dc1f05c0",
+                  "prefix": "payment_method_status_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "userId"
                   ],
-                  "name": "Payment_userId_idx_a489d58a",
-                  "prefix": "Payment_userId_idx",
+                  "name": "payment_userId_idx_a489d58a",
+                  "prefix": "payment_userId_idx",
                   "unique": false
                 },
                 {
@@ -3336,8 +3720,8 @@
                     "userId",
                     "status"
                   ],
-                  "name": "Payment_userId_status_idx_e4a128ba",
-                  "prefix": "Payment_userId_status_idx",
+                  "name": "payment_userId_status_idx_e4a128ba",
+                  "prefix": "payment_userId_status_idx",
                   "unique": false
                 }
               ],
@@ -3351,20 +3735,15 @@
                   "columns": [
                     "transactionId"
                   ]
-                },
-                {
-                  "columns": [
-                    "providerSessionId"
-                  ]
                 }
               ]
             },
-            "Question": {
+            "problem": {
               "checks": [
                 {
                   "expression": "\"type\" IN ('MCQ', 'WRITTEN', 'CODING')",
-                  "name": "Question_type_check_79e990c5",
-                  "prefix": "Question_type_check"
+                  "name": "problem_type_check_79e990c5",
+                  "prefix": "problem_type_check"
                 }
               ],
               "columns": {
@@ -3372,6 +3751,11 @@
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
                   "nullable": false
+                },
+                "correctAnswer": {
+                  "codecId": "pg/json@1",
+                  "nativeType": "json",
+                  "nullable": true
                 },
                 "createdAt": {
                   "codecId": "pg/timestamptz-string@1",
@@ -3397,11 +3781,6 @@
                   "nativeType": "text",
                   "nullable": false
                 },
-                "expectedAnswer": {
-                  "codecId": "pg/json@1",
-                  "nativeType": "json",
-                  "nullable": true
-                },
                 "id": {
                   "codecId": "pg/int4@1",
                   "default": {
@@ -3411,7 +3790,12 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
-                "marks": {
+                "options": {
+                  "codecId": "pg/json@1",
+                  "nativeType": "json",
+                  "nullable": true
+                },
+                "points": {
                   "codecId": "pg/int4@1",
                   "default": {
                     "kind": "literal",
@@ -3420,7 +3804,12 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
-                "options": {
+                "solution": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "testCases": {
                   "codecId": "pg/json@1",
                   "nativeType": "json",
                   "nullable": true
@@ -3454,14 +3843,14 @@
                       "companyId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Question"
+                    "tableName": "problem"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Company"
+                    "tableName": "company"
                   }
                 },
                 {
@@ -3470,14 +3859,14 @@
                       "createdById"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Question"
+                    "tableName": "problem"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "User"
+                    "tableName": "user"
                   }
                 }
               ],
@@ -3486,40 +3875,40 @@
                   "columns": [
                     "companyId"
                   ],
-                  "name": "Question_companyId_idx_33acc5ed",
-                  "prefix": "Question_companyId_idx",
+                  "name": "problem_companyId_idx_33acc5ed",
+                  "prefix": "problem_companyId_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "createdAt"
                   ],
-                  "name": "Question_createdAt_idx_9575dbd7",
-                  "prefix": "Question_createdAt_idx",
+                  "name": "problem_createdAt_idx_9575dbd7",
+                  "prefix": "problem_createdAt_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "createdById"
                   ],
-                  "name": "Question_createdById_idx_8bf640ed",
-                  "prefix": "Question_createdById_idx",
+                  "name": "problem_createdById_idx_8bf640ed",
+                  "prefix": "problem_createdById_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "deletedAt"
                   ],
-                  "name": "Question_deletedAt_idx_a39f721c",
-                  "prefix": "Question_deletedAt_idx",
+                  "name": "problem_deletedAt_idx_a39f721c",
+                  "prefix": "problem_deletedAt_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "type"
                   ],
-                  "name": "Question_type_idx_b6b604ea",
-                  "prefix": "Question_type_idx",
+                  "name": "problem_type_idx_b6b604ea",
+                  "prefix": "problem_type_idx",
                   "unique": false
                 }
               ],
@@ -3530,19 +3919,19 @@
               },
               "uniques": []
             },
-            "RefreshToken": {
+            "result": {
               "columns": {
+                "attemptId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
                 "createdAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "default": {
                     "expression": "now()",
                     "kind": "function"
                   },
-                  "nativeType": "timestamptz",
-                  "nullable": false
-                },
-                "expiresAt": {
-                  "codecId": "pg/timestamptz-string@1",
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
@@ -3555,19 +3944,45 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
-                "revokedAt": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "nativeType": "timestamptz",
-                  "nullable": true
-                },
-                "tokenHash": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
+                "maxScore": {
+                  "codecId": "pg/float8@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "float8",
                   "nullable": false
                 },
-                "userId": {
-                  "codecId": "pg/int4@1",
-                  "nativeType": "int4",
+                "passed": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
+                "percentage": {
+                  "codecId": "pg/float8@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "float8",
+                  "nullable": false
+                },
+                "totalScore": {
+                  "codecId": "pg/float8@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "float8",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
                   "nullable": false
                 }
               },
@@ -3576,44 +3991,35 @@
                   "onDelete": "cascade",
                   "source": {
                     "columns": [
-                      "userId"
+                      "attemptId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "RefreshToken"
+                    "tableName": "result"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "User"
+                    "tableName": "attempt"
                   }
                 }
               ],
               "indexes": [
                 {
                   "columns": [
-                    "expiresAt"
+                    "passed"
                   ],
-                  "name": "RefreshToken_expiresAt_idx_6b6b8c10",
-                  "prefix": "RefreshToken_expiresAt_idx",
+                  "name": "result_passed_idx_23b312ac",
+                  "prefix": "result_passed_idx",
                   "unique": false
                 },
                 {
                   "columns": [
-                    "userId"
+                    "percentage"
                   ],
-                  "name": "RefreshToken_userId_idx_a489d58a",
-                  "prefix": "RefreshToken_userId_idx",
-                  "unique": false
-                },
-                {
-                  "columns": [
-                    "userId",
-                    "revokedAt"
-                  ],
-                  "name": "RefreshToken_userId_revokedAt_idx_eae4cbef",
-                  "prefix": "RefreshToken_userId_revokedAt_idx",
+                  "name": "result_percentage_idx_4cc2fd0e",
+                  "prefix": "result_percentage_idx",
                   "unique": false
                 }
               ],
@@ -3625,17 +4031,17 @@
               "uniques": [
                 {
                   "columns": [
-                    "tokenHash"
+                    "attemptId"
                   ]
                 }
               ]
             },
-            "Submission": {
+            "submission": {
               "checks": [
                 {
-                  "expression": "\"status\" IN ('PENDING', 'EVALUATED')",
-                  "name": "Submission_status_check_1654eba5",
-                  "prefix": "Submission_status_check"
+                  "expression": "\"status\" IN ('PENDING', 'EVALUATED', 'REJECTED')",
+                  "name": "submission_status_check_b7a2787b",
+                  "prefix": "submission_status_check"
                 }
               ],
               "columns": {
@@ -3650,6 +4056,11 @@
                   "nullable": false
                 },
                 "attemptId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "candidateId": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
                   "nullable": false
@@ -3692,7 +4103,7 @@
                   "nativeType": "text",
                   "nullable": true
                 },
-                "questionId": {
+                "problemId": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
                   "nullable": false
@@ -3740,14 +4151,14 @@
                       "attemptId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Submission"
+                    "tableName": "submission"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Attempt"
+                    "tableName": "attempt"
                   }
                 },
                 {
@@ -3757,30 +4168,30 @@
                       "assessmentQuestionId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Submission"
+                    "tableName": "submission"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "AssessmentQuestion"
+                    "tableName": "assessmentProblem"
                   }
                 },
                 {
                   "source": {
                     "columns": [
-                      "questionId"
+                      "problemId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Submission"
+                    "tableName": "submission"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Question"
+                    "tableName": "problem"
                   }
                 }
               ],
@@ -3789,32 +4200,40 @@
                   "columns": [
                     "assessmentQuestionId"
                   ],
-                  "name": "Submission_assessmentQuestionId_idx_03ea3021",
-                  "prefix": "Submission_assessmentQuestionId_idx",
+                  "name": "submission_assessmentQuestionId_idx_03ea3021",
+                  "prefix": "submission_assessmentQuestionId_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "attemptId"
                   ],
-                  "name": "Submission_attemptId_idx_94f50eb9",
-                  "prefix": "Submission_attemptId_idx",
+                  "name": "submission_attemptId_idx_94f50eb9",
+                  "prefix": "submission_attemptId_idx",
                   "unique": false
                 },
                 {
                   "columns": [
-                    "questionId"
+                    "candidateId"
                   ],
-                  "name": "Submission_questionId_idx_fdb42076",
-                  "prefix": "Submission_questionId_idx",
+                  "name": "submission_candidateId_idx_462b5869",
+                  "prefix": "submission_candidateId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "problemId"
+                  ],
+                  "name": "submission_problemId_idx_0024556d",
+                  "prefix": "submission_problemId_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "status"
                   ],
-                  "name": "Submission_status_idx_e98638ab",
-                  "prefix": "Submission_status_idx",
+                  "name": "submission_status_idx_e98638ab",
+                  "prefix": "submission_status_idx",
                   "unique": false
                 }
               ],
@@ -3832,12 +4251,17 @@
                 }
               ]
             },
-            "User": {
+            "user": {
               "checks": [
                 {
                   "expression": "\"role\" IN ('ADMIN', 'COMPANY', 'CANDIDATE')",
-                  "name": "User_role_check_eaf0c157",
-                  "prefix": "User_role_check"
+                  "name": "user_role_check_eaf0c157",
+                  "prefix": "user_role_check"
+                },
+                {
+                  "expression": "\"status\" IN ('ACTIVE', 'BLOCKED', 'DELETED')",
+                  "name": "user_status_check_15e9af0c",
+                  "prefix": "user_status_check"
                 }
               ],
               "columns": {
@@ -3879,7 +4303,12 @@
                   "nativeType": "text",
                   "nullable": false
                 },
-                "passwordHash": {
+                "password": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "phone": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": true
@@ -3899,6 +4328,21 @@
                     "plane": "storage"
                   }
                 },
+                "status": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "ACTIVE"
+                  },
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "UserStatus",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
                 "updatedAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "nativeType": "timestamptz",
@@ -3911,24 +4355,32 @@
                   "columns": [
                     "createdAt"
                   ],
-                  "name": "User_createdAt_idx_9575dbd7",
-                  "prefix": "User_createdAt_idx",
+                  "name": "user_createdAt_idx_9575dbd7",
+                  "prefix": "user_createdAt_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "deletedAt"
                   ],
-                  "name": "User_deletedAt_idx_a39f721c",
-                  "prefix": "User_deletedAt_idx",
+                  "name": "user_deletedAt_idx_a39f721c",
+                  "prefix": "user_deletedAt_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "role"
                   ],
-                  "name": "User_role_idx_2c1ddf83",
-                  "prefix": "User_role_idx",
+                  "name": "user_role_idx_2c1ddf83",
+                  "prefix": "user_role_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "status"
+                  ],
+                  "name": "user_status_idx_e98638ab",
+                  "prefix": "user_status_idx",
                   "unique": false
                 }
               ],
@@ -4009,7 +4461,8 @@
               "kind": "valueSet",
               "values": [
                 "PENDING",
-                "EVALUATED"
+                "EVALUATED",
+                "REJECTED"
               ]
             },
             "UserRole": {
@@ -4019,6 +4472,14 @@
                 "COMPANY",
                 "CANDIDATE"
               ]
+            },
+            "UserStatus": {
+              "kind": "valueSet",
+              "values": [
+                "ACTIVE",
+                "BLOCKED",
+                "DELETED"
+              ]
             }
           }
         },
@@ -4026,10 +4487,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "6ce72377cc555496c29df2ea5ad6c972a50943a87b6fd91f71d7a7baeaa2479f"
+    "storageHash": "a3891f8e7c7dc6da32368f37fe345c710029994c2063ed8922e7bcc81c5a2958"
   },
   "execution": {
-    "executionHash": "2d0336bbc3d1d623ce59bada9178ff9922785ce569e160e4aa9cea6ded9e0332",
+    "executionHash": "87af4fc1b8198397cff29ea111111620ba90ce28c03b51ecf114a3d680742c18",
     "mutations": {
       "defaults": [
         {
@@ -4044,7 +4505,7 @@
           "ref": {
             "column": "updatedAt",
             "namespace": "public",
-            "table": "Assessment"
+            "table": "assessment"
           }
         },
         {
@@ -4059,7 +4520,7 @@
           "ref": {
             "column": "updatedAt",
             "namespace": "public",
-            "table": "Attempt"
+            "table": "attempt"
           }
         },
         {
@@ -4089,7 +4550,7 @@
           "ref": {
             "column": "updatedAt",
             "namespace": "public",
-            "table": "Company"
+            "table": "company"
           }
         },
         {
@@ -4104,7 +4565,7 @@
           "ref": {
             "column": "updatedAt",
             "namespace": "public",
-            "table": "Invitation"
+            "table": "invitation"
           }
         },
         {
@@ -4119,7 +4580,7 @@
           "ref": {
             "column": "updatedAt",
             "namespace": "public",
-            "table": "Payment"
+            "table": "payment"
           }
         },
         {
@@ -4134,7 +4595,7 @@
           "ref": {
             "column": "updatedAt",
             "namespace": "public",
-            "table": "Question"
+            "table": "problem"
           }
         },
         {
@@ -4149,7 +4610,7 @@
           "ref": {
             "column": "updatedAt",
             "namespace": "public",
-            "table": "Submission"
+            "table": "result"
           }
         },
         {
@@ -4164,7 +4625,7 @@
           "ref": {
             "column": "updatedAt",
             "namespace": "public",
-            "table": "User"
+            "table": "user"
           }
         }
       ]

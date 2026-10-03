@@ -6,6 +6,12 @@ enum UserRole {
   CANDIDATE
 }
 
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
 enum AssessmentStatus {
   DRAFT
   PUBLISHED
@@ -36,6 +42,7 @@ enum AttemptStatus {
 enum SubmissionStatus {
   PENDING
   EVALUATED
+  REJECTED
 }
 
 enum PaymentProvider {
@@ -53,33 +60,37 @@ enum PaymentStatus {
 }
 
 model User {
-  id                  Int               @id @default(autoincrement())
-  email               String            @unique
-  passwordHash        String?
-  googleId            String?           @unique
-  name                String
-  role                UserRole          @default(CANDIDATE)
-  deletedAt           TimestamptzString?
-  createdAt           TimestamptzString @default(now())
-  updatedAt           temporal.updatedAtString()
+  id           Int               @id @default(autoincrement())
+  email        String            @unique
+  passwordHash String?           @map("password")
+  googleId     String?           @unique
+  name         String
+  phone        String?
+  role         UserRole          @default(CANDIDATE)
+  status       UserStatus        @default(ACTIVE)
+  deletedAt    TimestamptzString?
+  createdAt    TimestamptzString @default(now())
+  updatedAt    temporal.updatedAtString()
 
   companyProfile      Company?
   candidateProfile    CandidateProfile?
 
-  assessmentsCreated  Assessment[]      @relation("AssessmentCreator")
-  questionsCreated    Question[]        @relation("QuestionCreator")
+  assessmentsCreated  Assessment[] @relation("AssessmentCreator")
+  questionsCreated    Question[]   @relation("QuestionCreator")
 
-  sentInvitations     Invitation[]      @relation("InvitationInviter")
-  receivedInvitations Invitation[]      @relation("InvitationCandidate")
+  sentInvitations     Invitation[] @relation("InvitationInviter")
+  receivedInvitations Invitation[] @relation("InvitationCandidate")
 
   attempts            Attempt[]
   payments            Payment[]
   refreshTokens       RefreshToken[]
-  auditLogs           AuditLog[]        @relation("AuditActor")
+  auditLogs           AuditLog[]   @relation("AuditActor")
 
   @@index([role])
+  @@index([status])
   @@index([deletedAt])
   @@index([createdAt])
+  @@map("user")
 }
 
 model Company {
@@ -87,6 +98,8 @@ model Company {
   ownerId     Int               @unique
   name        String
   description String?
+  industry    String?
+  logo        String?
   website     String?
   deletedAt   TimestamptzString?
   createdAt   TimestamptzString @default(now())
@@ -94,9 +107,11 @@ model Company {
 
   owner       User              @relation(fields: [ownerId], references: [id])
   assessments Assessment[]
+  questions   Question[]
 
   @@index([name])
   @@index([deletedAt])
+  @@map("company")
 }
 
 model CandidateProfile {
@@ -112,24 +127,25 @@ model CandidateProfile {
 }
 
 model Assessment {
-  id             Int               @id @default(autoincrement())
-  companyId      Int
-  createdById    Int
-  title          String
-  description    String?
-  status         AssessmentStatus  @default(DRAFT)
+  id              Int               @id @default(autoincrement())
+  companyId       Int
+  createdById     Int
+  title           String
+  description     String?
+  status          AssessmentStatus  @default(DRAFT)
   durationMinutes Int
-  passingScore   Float?
-  maxAttempts    Int               @default(1)
-  publishedAt    TimestamptzString?
-  startsAt       TimestamptzString?
-  endsAt         TimestamptzString?
-  deletedAt      TimestamptzString?
-  createdAt      TimestamptzString  @default(now())
-  updatedAt      temporal.updatedAtString()
+  passingScore    Float?
+  maxAttempts     Int               @default(1)
+  price           Float             @default(0)
+  publishedAt     TimestamptzString?
+  startsAt        TimestamptzString?
+  endsAt          TimestamptzString?
+  deletedAt       TimestamptzString?
+  createdAt       TimestamptzString  @default(now())
+  updatedAt       temporal.updatedAtString()
 
-  company        Company            @relation(fields: [companyId], references: [id])
-  createdBy      User               @relation("AssessmentCreator", fields: [createdById], references: [id])
+  company        Company             @relation(fields: [companyId], references: [id])
+  createdBy      User                @relation("AssessmentCreator", fields: [createdById], references: [id])
   questions      AssessmentQuestion[]
   invitations    Invitation[]
   attempts       Attempt[]
@@ -139,24 +155,27 @@ model Assessment {
   @@index([createdById])
   @@index([status, createdAt])
   @@index([deletedAt])
+  @@map("assessment")
 }
 
 model Question {
-  id           Int               @id @default(autoincrement())
-  companyId    Int
-  createdById  Int
-  type         QuestionType
-  title        String
-  description  String
-  marks        Int               @default(1)
-  options      Json?
-  expectedAnswer Json?
-  deletedAt    TimestamptzString?
-  createdAt    TimestamptzString @default(now())
-  updatedAt    temporal.updatedAtString()
+  id             Int               @id @default(autoincrement())
+  companyId      Int
+  createdById    Int
+  type           QuestionType
+  title          String
+  description    String
+  marks          Int               @default(1) @map("points")
+  options        Json?
+  expectedAnswer Json?             @map("correctAnswer")
+  solution       String?
+  testCases      Json?
+  deletedAt      TimestamptzString?
+  createdAt      TimestamptzString @default(now())
+  updatedAt      temporal.updatedAtString()
 
-  company      Company           @relation(fields: [companyId], references: [id])
-  createdBy    User              @relation("QuestionCreator", fields: [createdById], references: [id])
+  company      Company               @relation(fields: [companyId], references: [id])
+  createdBy    User                  @relation("QuestionCreator", fields: [createdById], references: [id])
   assessments  AssessmentQuestion[]
   submissions  Submission[]
 
@@ -165,43 +184,45 @@ model Question {
   @@index([type])
   @@index([deletedAt])
   @@index([createdAt])
+  @@map("problem")
 }
 
 model AssessmentQuestion {
-  id           Int          @id @default(autoincrement())
-  assessmentId Int
-  questionId  Int
-  position     Int
-  marksOverride Int?
+  id             Int          @id @default(autoincrement())
+  assessmentId   Int
+  questionId    Int           @map("problemId")
+  position       Int           @map("order")
+  marksOverride  Int?
 
   assessment   Assessment   @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
   question     Question     @relation(fields: [questionId], references: [id])
-
   submissions  Submission[]
 
   @@unique([assessmentId, questionId])
   @@unique([assessmentId, position])
   @@index([assessmentId, position])
+  @@map("assessmentProblem")
 }
 
 model Invitation {
-  id           Int                @id @default(autoincrement())
+  id           Int               @id @default(autoincrement())
   assessmentId Int
   candidateId  Int
   invitedById  Int
-  status       InvitationStatus   @default(PENDING)
+  status       InvitationStatus  @default(PENDING)
   expiresAt    TimestamptzString?
   respondedAt  TimestamptzString?
-  createdAt    TimestamptzString  @default(now())
+  createdAt    TimestamptzString @default(now())
   updatedAt    temporal.updatedAtString()
 
-  assessment   Assessment         @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
-  candidate    User               @relation("InvitationCandidate", fields: [candidateId], references: [id])
-  invitedBy    User               @relation("InvitationInviter", fields: [invitedById], references: [id])
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  candidate    User       @relation("InvitationCandidate", fields: [candidateId], references: [id])
+  invitedBy    User       @relation("InvitationInviter", fields: [invitedById], references: [id])
 
   @@unique([assessmentId, candidateId])
   @@index([candidateId, status])
   @@index([assessmentId, status])
+  @@map("invitation")
 }
 
 model Attempt {
@@ -217,65 +238,88 @@ model Attempt {
   createdAt     TimestamptzString @default(now())
   updatedAt     temporal.updatedAtString()
 
-  assessment    Assessment     @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
-  candidate     User           @relation(fields: [candidateId], references: [id])
+  assessment    Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  candidate     User       @relation(fields: [candidateId], references: [id])
   submissions   Submission[]
+  result        Result?
 
   @@unique([assessmentId, candidateId, attemptNumber])
   @@index([candidateId, status])
   @@index([assessmentId, status])
   @@index([createdAt])
+  @@map("attempt")
 }
 
 model Submission {
-  id                  Int                @id @default(autoincrement())
-  attemptId           Int
+  id                   Int               @id @default(autoincrement())
+  attemptId            Int
   assessmentQuestionId Int
-  questionId          Int
-  answer              Json?
-  code                String?
-  language            String?
-  score               Float?
-  feedback            String?
-  status              SubmissionStatus  @default(PENDING)
-  submittedAt         TimestamptzString @default(now())
-  evaluatedAt         TimestamptzString?
+  questionId           Int               @map("problemId")
+  candidateId          Int
+  answer               Json?
+  code                 String?
+  language             String?
+  score                Float?
+  feedback             String?
+  status               SubmissionStatus  @default(PENDING)
+  submittedAt          TimestamptzString @default(now())
+  evaluatedAt          TimestamptzString?
   createdAt            TimestamptzString @default(now())
-  updatedAt           temporal.updatedAtString()
+  updatedAt            TimestamptzString
 
   attempt             Attempt            @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   assessmentQuestion  AssessmentQuestion @relation(fields: [assessmentQuestionId], references: [id], onDelete: Cascade)
-  question            Question           @relation(fields: [questionId], references: [id])
+  question            Question            @relation(fields: [questionId], references: [id])
 
   @@unique([attemptId, assessmentQuestionId])
   @@index([attemptId])
+  @@index([candidateId])
   @@index([questionId])
   @@index([status])
+  @@map("submission")
 }
 
 model Payment {
   id                Int               @id @default(autoincrement())
   userId            Int
   assessmentId      Int?
-  provider          PaymentProvider
+  provider          PaymentProvider   @map("method")
   status            PaymentStatus     @default(PENDING)
-  amountInMinorUnit Int
+  amount            Float
   currency          String            @default("BDT")
+  providerSessionId String?           @map("gatewaySessionId")
   transactionId     String            @unique
-  providerSessionId String?           @unique
   providerPaymentId String?
   metadata          Json?
   paidAt            TimestamptzString?
   createdAt         TimestamptzString @default(now())
   updatedAt         temporal.updatedAtString()
 
-  user              User              @relation(fields: [userId], references: [id])
-  assessment        Assessment?       @relation(fields: [assessmentId], references: [id])
+  user       User        @relation(fields: [userId], references: [id])
+  assessment Assessment? @relation(fields: [assessmentId], references: [id])
 
   @@index([userId, status])
   @@index([assessmentId])
   @@index([provider, status])
   @@index([createdAt])
+  @@map("payment")
+}
+
+model Result {
+  id         Int               @id @default(autoincrement())
+  attemptId  Int               @unique
+  totalScore Float             @default(0) @map("totalScore")
+  maxScore   Float             @default(0)
+  percentage Float             @default(0)
+  passed     Boolean           @default(false)
+  createdAt  TimestamptzString @default(now())
+  updatedAt  temporal.updatedAtString()
+
+  attempt Attempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([passed])
+  @@index([percentage])
+  @@map("result")
 }
 
 model RefreshToken {
@@ -294,12 +338,13 @@ model RefreshToken {
 
 model AuditLog {
   id         Int               @id @default(autoincrement())
-  actorId    Int?
+  actorId    Int?              @map("userId")
   action     String
-  entityType String
-  entityId   Int?
+  entityType String            @map("entity")
+  entityId   String?
   metadata   Json?
   ipAddress  String?
+  userAgent  String?
   createdAt  TimestamptzString @default(now())
 
   actor User? @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
@@ -308,4 +353,5 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([action, createdAt])
   @@index([createdAt])
+  @@map("auditLog")
 }
