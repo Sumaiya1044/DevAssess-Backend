@@ -34,7 +34,27 @@ const createCompany = async (
   });
 };
 
+const updateCompany = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
+  const result = await CompanyServices.updateCompany(
+    Number(req.params.id),
+    req.body,
+    req.user!.id,
+    req.user!.role,
+  );
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Company updated successfully",
+    data: result,
+  });
+};
+
 export const CompanyControllers = {
   createCompany,
   getCompanyById,
+  updateCompany,
 };

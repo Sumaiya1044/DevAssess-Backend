@@ -22,4 +22,12 @@ router.post(
   CompanyControllers.createCompany,
 );
 
+router.patch(
+  "/:id",
+  auth,
+  authorize("COMPANY", "ADMIN"),
+  validateRequest(CompanyValidations.updateCompanySchema),
+  CompanyControllers.updateCompany,
+);
+
 export default router;

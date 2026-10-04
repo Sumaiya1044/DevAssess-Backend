@@ -9,6 +9,14 @@ interface CreateCompanyPayload {
   website?: string;
 }
 
+interface UpdateCompanyPayload {
+  name?: string;
+  description?: string;
+  industry?: string;
+  logo?: string;
+  website?: string;
+}
+
 const createCompany = async (
   payload: CreateCompanyPayload,
   ownerId: number,
@@ -48,6 +56,7 @@ const createCompany = async (
     if (!restoredCompany) {
       throw new AppError(500, "Failed to restore company");
     }
+
     const company = await db.orm.public.Company
       .where({ id: restoredCompany.id })
       .first();
@@ -79,7 +88,55 @@ const getCompanyById = async (companyId: number) => {
   return company;
 };
 
+const updateCompany = async (
+  companyId: number,
+  payload: UpdateCompanyPayload,
+  userId: number,
+  userRole: "ADMIN" | "COMPANY" | "CANDIDATE",
+) => {
+  const company = await db.orm.public.Company
+    .where({ id: companyId })
+    .first();
+
+  if (!company || company.deletedAt) {
+    throw new AppError(404, "Company not found");
+  }
+
+  if (userRole === "COMPANY" && company.ownerId !== userId) {
+    throw new AppError(
+      403,
+      "You can only update your own company",
+    );
+  }
+
+  if (userRole === "CANDIDATE") {
+    throw new AppError(
+      403,
+      "Only COMPANY or ADMIN users can update a company",
+    );
+  }
+
+  const updatedCompany = await db.orm.public.Company
+    .where({ id: companyId })
+    .update(payload);
+
+  if (!updatedCompany) {
+    throw new AppError(500, "Failed to update company");
+  }
+
+  const result = await db.orm.public.Company
+    .where({ id: companyId })
+    .first();
+
+  if (!result) {
+    throw new AppError(404, "Company not found");
+  }
+
+  return result;
+};
+
 export const CompanyServices = {
   createCompany,
   getCompanyById,
+  updateCompany,
 };
