@@ -53,8 +53,27 @@ const updateCompany = async (
   });
 };
 
+const deleteCompany = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
+  await CompanyServices.deleteCompany(
+    Number(req.params.id),
+    req.user!.id,
+    req.user!.role,
+  );
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Company deleted successfully",
+    data: {},
+  });
+};
+
 export const CompanyControllers = {
   createCompany,
   getCompanyById,
   updateCompany,
+  deleteCompany,
 };

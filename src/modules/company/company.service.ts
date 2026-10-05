@@ -135,8 +135,45 @@ const updateCompany = async (
   return result;
 };
 
+const deleteCompany = async (
+  companyId: number,
+  userId: number,
+  userRole: "ADMIN" | "COMPANY" | "CANDIDATE",
+) => {
+  const company = await db.orm.public.Company
+    .where({ id: companyId })
+    .first();
+
+  if (!company || company.deletedAt) {
+    throw new AppError(404, "Company not found");
+  }
+
+  if (userRole === "COMPANY" && company.ownerId !== userId) {
+    throw new AppError(
+      403,
+      "You can only delete your own company",
+    );
+  }
+
+  if (userRole === "CANDIDATE") {
+    throw new AppError(
+      403,
+      "Only COMPANY or ADMIN users can delete a company",
+    );
+  }
+
+  await db.orm.public.Company
+    .where({ id: companyId })
+    .update({
+      deletedAt: new Date().toISOString(),
+    });
+
+  return null;
+};
+
 export const CompanyServices = {
   createCompany,
   getCompanyById,
   updateCompany,
+  deleteCompany,
 };

@@ -30,4 +30,11 @@ router.patch(
   CompanyControllers.updateCompany,
 );
 
+router.delete(
+  "/:id",
+  auth,
+  authorize("COMPANY", "ADMIN"),
+  CompanyControllers.deleteCompany,
+);
+
 export default router;
