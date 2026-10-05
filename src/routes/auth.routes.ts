@@ -3,6 +3,7 @@ import validateRequest from "../middleware/validateRequest.js";
 import { AuthControllers } from "../modules/auth/auth.controller.js";
 import {
   loginSchema,
+  refreshTokenSchema,
   registerSchema,
 } from "../modules/auth/auth.validation.js";
 
@@ -18,6 +19,18 @@ router.post(
   "/login",
   validateRequest(loginSchema),
   AuthControllers.login,
+);
+
+router.post(
+  "/refresh-token",
+  validateRequest(refreshTokenSchema),
+  AuthControllers.refreshToken,
+);
+
+router.post(
+  "/logout",
+  validateRequest(refreshTokenSchema),
+  AuthControllers.logout,
 );
 
 export default router;

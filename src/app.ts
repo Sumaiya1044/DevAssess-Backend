@@ -6,6 +6,14 @@ import sendResponse from "./utils/sendResponse.js";
 import globalErrorHandler from "./middleware/globalErrorHandler.js";
 import authRoutes from "./routes/auth.routes.js";
 import issuesRoutes from "./routes/issues.routes.js";
+import assessmentRoutes from "./routes/assessment.routes.js";
+import companyRoutes from "./routes/company.routes.js";
+import problemRoutes from "./routes/problem.routes.js";
+import invitationRoutes from "./routes/invitation.routes.js";
+import attemptRoutes from "./routes/attempt.routes.js";
+import submissionRoutes from "./routes/submission.routes.js";
+import resultRoutes from "./routes/result.routes.js";
+import userRoutes from "./routes/user.routes.js";
 
 const app = express();
 
@@ -39,6 +47,14 @@ app.get("/", (_req, res) => {
 app.use("/api/auth", authRoutes);
 
 app.use("/api/issues", issuesRoutes);
+app.use("/api/v1/assessments", assessmentRoutes);
+app.use("/api/v1/companies", companyRoutes);
+app.use("/api/v1/problems", problemRoutes);
+app.use("/api/v1/invitations", invitationRoutes);
+app.use("/api/v1/attempts", attemptRoutes);
+app.use("/api/v1/submissions", submissionRoutes);
+app.use("/api/v1/results", resultRoutes);
+app.use("/api/v1/users", userRoutes);
 
 app.use(globalErrorHandler);
 

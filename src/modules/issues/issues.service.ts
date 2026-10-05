@@ -142,19 +142,17 @@ const getSingleIssue = async (issueId: number) => {
 
   const issue = result.rows[0];
   const reporter = await getReporter(issue.reporter_id);
-
   return {
     id: issue.id,
     title: issue.title,
     description: issue.description,
     type: issue.type,
     status: issue.status,
-    reporter:
-      reporter ?? {
-        id: issue.reporter_id,
-        name: "Unknown",
-        role: "contributor" as UserRole,
-      },
+    reporter: reporter ?? {
+      id: issue.reporter_id,
+      name: "Unknown",
+      role: "CANDIDATE" as UserRole,
+    },
     created_at: issue.created_at,
     updated_at: issue.updated_at,
   };
@@ -180,7 +178,7 @@ const updateIssue = async (
 
   const existingIssue = existingResult.rows[0];
 
-  if (userRole === "contributor") {
+  if (userRole === "COMPANY") {
     if (existingIssue.reporter_id !== userId) {
       throw new AppError(403, "Forbidden");
     }
@@ -188,14 +186,14 @@ const updateIssue = async (
     if (existingIssue.status !== "open") {
       throw new AppError(
         409,
-        "Only open issues can be updated by contributors",
+        "Only open issues can be updated by companies",
       );
     }
 
     if (payload.status !== undefined) {
       throw new AppError(
         403,
-        "Contributors cannot change issue status",
+        "Companies cannot change issue status",
       );
     }
   }
@@ -219,8 +217,11 @@ const updateIssue = async (
   }
 
   if (payload.status !== undefined) {
-    if (userRole !== "maintainer") {
-      throw new AppError(403, "Only maintainers can change issue status");
+    if (userRole !== "ADMIN") {
+      throw new AppError(
+        403,
+        "Only admins can change issue status",
+      );
     }
 
     values.push(payload.status);

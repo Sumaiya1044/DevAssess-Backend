@@ -15,7 +15,7 @@ const router = Router();
 router.post(
   "/",
   auth,
-  authorize("contributor", "maintainer"),
+  authorize("ADMIN", "COMPANY"),
   validateRequest(createIssueSchema),
   IssueControllers.createIssue,
 );
@@ -35,7 +35,7 @@ router.get(
 router.patch(
   "/:id",
   auth,
-  authorize("contributor", "maintainer"),
+  authorize("ADMIN", "COMPANY"),
   validateRequest(updateIssueSchema),
   IssueControllers.updateIssue,
 );
@@ -43,7 +43,7 @@ router.patch(
 router.delete(
   "/:id",
   auth,
-  authorize("maintainer"),
+  authorize("ADMIN"),
   validateRequest(issueIdSchema),
   IssueControllers.deleteIssue,
 );

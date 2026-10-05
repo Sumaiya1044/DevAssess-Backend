@@ -1,6 +1,6 @@
 import jwt, { SignOptions } from "jsonwebtoken";
 
-type UserRole = "contributor" | "maintainer";
+type UserRole = "ADMIN" | "COMPANY" | "CANDIDATE";
 
 interface JwtPayload {
   id: number;

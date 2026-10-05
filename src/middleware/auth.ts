@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-export type UserRole = "contributor" | "maintainer";
+export type UserRole = "ADMIN" | "COMPANY" | "CANDIDATE";
 
 export interface AuthUser {
   id: number;
@@ -46,7 +46,7 @@ const auth = (
       decoded === null ||
       typeof decoded.id !== "number" ||
       typeof decoded.name !== "string" ||
-      (decoded.role !== "contributor" && decoded.role !== "maintainer")
+      (decoded.role !== "ADMIN" && decoded.role !== "COMPANY" && decoded.role !== "CANDIDATE")
     ) {
       return res.status(401).json({
         success: false,
