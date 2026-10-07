@@ -1,0 +1,111 @@
+#!/usr/bin/env -S node
+
+import type { Contract as Start } from '../../snapshots/1df3c87349b39fd6679ae7b6dc93bf5d853aba5fbe5df16356bc85726d1205fe/contract';
+import startContract from '../../snapshots/1df3c87349b39fd6679ae7b6dc93bf5d853aba5fbe5df16356bc85726d1205fe/contract.json' with { type: 'json' };
+
+import type { Contract as End } from '../../snapshots/a3891f8e7c7dc6da32368f37fe345c710029994c2063ed8922e7bcc81c5a2958/contract';
+import endContract from '../../snapshots/a3891f8e7c7dc6da32368f37fe345c710029994c2063ed8922e7bcc81c5a2958/contract.json' with { type: 'json' };
+
+import {
+  Migration,
+  MigrationCLI,
+  col,
+  fn,
+  lit,
+  primaryKey,
+  checkExpression,
+} from '@prisma/orm-postgres/migration';
+
+export default class M extends Migration<Start, End> {
+  override readonly startContractJson = startContract;
+  override readonly endContractJson = endContract;
+
+  override get operations() {
+    return [
+    this.addColumn({ schema: "public", table: "attempt", column: col("attemptNumber", "int4", { notNull: true, default: lit("1") }) }),
+    this.addColumn({ schema: "public", table: "attempt", column: col("score", "float8") }),
+    this.addColumn({ schema: "public", table: "submission", column: col("assessmentQuestionId", "int4", { notNull: true }) }),
+    this.addColumn({ schema: "public", table: "submission", column: col("createdAt", "timestamptz", { notNull: true, default: fn("now()") }) }),
+    this.addColumn({ schema: "public", table: "submission", column: col("updatedAt", "timestamptz", { notNull: true, default: fn("now()") }) }),
+    this.addColumn({ schema: "public", table: "assessment", column: col("passingScore", "float8") }),
+    this.addColumn({ schema: "public", table: "assessment", column: col("maxAttempts", "int4", { notNull: true, default: lit("1") }) }),
+    this.addColumn({ schema: "public", table: "assessment", column: col("startsAt", "timestamptz") }),
+    this.addColumn({ schema: "public", table: "assessment", column: col("endsAt", "timestamptz") }),
+    this.addColumn({ schema: "public", table: "assessment", column: col("deletedAt", "timestamptz") }),
+    this.addColumn({ schema: "public", table: "user", column: col("deletedAt", "timestamptz") }),
+    this.addColumn({ schema: "public", table: "company", column: col("deletedAt", "timestamptz") }),
+    this.addColumn({ schema: "public", table: "problem", column: col("companyId", "int4", { notNull: true }) }),
+    this.addColumn({ schema: "public", table: "problem", column: col("createdById", "int4", { notNull: true }) }),
+    this.addColumn({ schema: "public", table: "problem", column: col("deletedAt", "timestamptz") }),
+    this.addColumn({ schema: "public", table: "invitation", column: col("invitedById", "int4", { notNull: true }) }),
+    this.addColumn({ schema: "public", table: "invitation", column: col("respondedAt", "timestamptz") }),
+    this.addColumn({ schema: "public", table: "assessmentProblem", column: col("marksOverride", "int4") }),
+    this.addColumn({ schema: "public", table: "payment", column: col("providerPaymentId", "text") }),
+    this.addColumn({ schema: "public", table: "payment", column: col("metadata", "json") }),
+    this.createTable({ schema: "public", table: "candidateProfile", columns: [
+      col("id", "SERIAL", { notNull: true }),
+      col("userId", "int4", { notNull: true }),
+      col("bio", "text"),
+      col("skills", "text"),
+      col("resumeUrl", "text"),
+      col("createdAt", "timestamptz", { notNull: true, default: fn("now()") }),
+      col("updatedAt", "timestamptz", { notNull: true })
+    ] }),
+    this.addPrimaryKey({ schema: "public", table: "candidateProfile", constraint: "candidateProfile_pkey", columns: ["id"] }),
+    this.addUnique({ schema: "public", table: "candidateProfile", constraint: "candidateProfile_userId_key", columns: ["userId"] }),
+    this.addForeignKey({ schema: "public", table: "candidateProfile", foreignKey: { name: "candidateProfile_userId_fkey", columns: ["userId"], references: { schema: "public", table: "user", columns: ["id"] } } }),
+    this.createIndex({ schema: "public", table: "candidateProfile", index: "candidateProfile_userId_idx", columns: ["userId"] }),
+    this.createTable({ schema: "public", table: "refreshToken", columns: [
+      col("id", "SERIAL", { notNull: true }),
+      col("userId", "int4", { notNull: true }),
+      col("tokenHash", "text", { notNull: true }),
+      col("expiresAt", "timestamptz", { notNull: true }),
+      col("revokedAt", "timestamptz"),
+      col("createdAt", "timestamptz", { notNull: true, default: fn("now()") })
+    ] }),
+    this.addPrimaryKey({ schema: "public", table: "refreshToken", constraint: "refreshToken_pkey", columns: ["id"] }),
+    this.addUnique({ schema: "public", table: "refreshToken", constraint: "refreshToken_tokenHash_key", columns: ["tokenHash"] }),
+    this.addForeignKey({ schema: "public", table: "refreshToken", foreignKey: { name: "refreshToken_userId_fkey", columns: ["userId"], references: { schema: "public", table: "user", columns: ["id"] }, onDelete: "cascade" } }),
+    this.createIndex({ schema: "public", table: "refreshToken", index: "refreshToken_userId_revokedAt_idx", columns: ["userId", "revokedAt"] }),
+    this.createIndex({ schema: "public", table: "refreshToken", index: "refreshToken_expiresAt_idx", columns: ["expiresAt"] }),
+    this.addForeignKey({ schema: "public", table: "problem", foreignKey: { name: "problem_companyId_fkey", columns: ["companyId"], references: { schema: "public", table: "company", columns: ["id"] } } }),
+    this.addForeignKey({ schema: "public", table: "problem", foreignKey: { name: "problem_createdById_fkey", columns: ["createdById"], references: { schema: "public", table: "user", columns: ["id"] } } }),
+    this.addForeignKey({ schema: "public", table: "invitation", foreignKey: { name: "invitation_invitedById_fkey", columns: ["invitedById"], references: { schema: "public", table: "user", columns: ["id"] } } }),
+    this.addForeignKey({ schema: "public", table: "submission", foreignKey: { name: "submission_assessmentQuestionId_fkey", columns: ["assessmentQuestionId"], references: { schema: "public", table: "assessmentProblem", columns: ["id"] }, onDelete: "cascade" } }),
+    this.createIndex({ schema: "public", table: "user", index: "user_deletedAt_idx", columns: ["deletedAt"] }),
+    this.createIndex({ schema: "public", table: "company", index: "company_deletedAt_idx", columns: ["deletedAt"] }),
+    this.createIndex({ schema: "public", table: "problem", index: "problem_companyId_idx", columns: ["companyId"] }),
+    this.createIndex({ schema: "public", table: "problem", index: "problem_createdById_idx", columns: ["createdById"] }),
+    this.createIndex({ schema: "public", table: "problem", index: "problem_deletedAt_idx", columns: ["deletedAt"] }),
+    this.createIndex({ schema: "public", table: "assessment", index: "assessment_status_createdAt_idx", columns: ["status", "createdAt"] }),
+    this.createIndex({ schema: "public", table: "assessment", index: "assessment_deletedAt_idx", columns: ["deletedAt"] }),
+    this.createIndex({ schema: "public", table: "invitation", index: "invitation_candidateId_status_idx", columns: ["candidateId", "status"] }),
+    this.createIndex({ schema: "public", table: "invitation", index: "invitation_assessmentId_status_idx", columns: ["assessmentId", "status"] }),
+    this.dropConstraint({ schema: "public", table: "payment", constraint: "payment_gatewaySessionId_key" }),
+    this.dropConstraint({ schema: "public", table: "attempt", constraint: "attempt_assessmentId_candidateId_key" }),
+    this.addUnique({ schema: "public", table: "attempt", constraint: "attempt_assessmentId_candidateId_attemptNumber_key", columns: ["assessmentId", "candidateId", "attemptNumber"] }),
+    this.dropConstraint({ schema: "public", table: "submission", constraint: "submission_attemptId_problemId_key" }),
+    this.addUnique({ schema: "public", table: "submission", constraint: "submission_attemptId_assessmentQuestionId_key", columns: ["attemptId", "assessmentQuestionId"] }),
+    this.createIndex({ schema: "public", table: "attempt", index: "attempt_candidateId_status_idx", columns: ["candidateId", "status"] }),
+    this.createIndex({ schema: "public", table: "attempt", index: "attempt_assessmentId_status_idx", columns: ["assessmentId", "status"] }),
+    this.createIndex({ schema: "public", table: "payment", index: "payment_userId_status_idx", columns: ["userId", "status"] }),
+    this.createIndex({ schema: "public", table: "payment", index: "payment_provider_status_idx", columns: ["method", "status"] }),
+    this.dropConstraint({ schema: "public", table: "assessmentProblem", constraint: "assessmentProblem_assessmentId_fkey" }),
+    this.dropConstraint({ schema: "public", table: "assessmentProblem", constraint: "assessmentProblem_problemId_fkey" }),
+    this.addForeignKey({ schema: "public", table: "assessmentProblem", foreignKey: { name: "assessmentProblem_assessmentId_fkey", columns: ["assessmentId"], references: { schema: "public", table: "assessment", columns: ["id"] }, onDelete: "cascade" } }),
+    this.addForeignKey({ schema: "public", table: "assessmentProblem", foreignKey: { name: "assessmentProblem_problemId_fkey", columns: ["problemId"], references: { schema: "public", table: "problem", columns: ["id"] } } }),
+    this.dropConstraint({ schema: "public", table: "attempt", constraint: "attempt_assessmentId_fkey" }),
+    this.dropConstraint({ schema: "public", table: "invitation", constraint: "invitation_assessmentId_fkey" }),
+    this.dropConstraint({ schema: "public", table: "result", constraint: "result_attemptId_fkey" }),
+    this.dropConstraint({ schema: "public", table: "submission", constraint: "submission_attemptId_fkey" }),
+    this.dropConstraint({ schema: "public", table: "auditLog", constraint: "auditLog_userId_fkey" }),
+    this.addForeignKey({ schema: "public", table: "attempt", foreignKey: { name: "attempt_assessmentId_fkey", columns: ["assessmentId"], references: { schema: "public", table: "assessment", columns: ["id"] }, onDelete: "cascade" } }),
+    this.addForeignKey({ schema: "public", table: "invitation", foreignKey: { name: "invitation_assessmentId_fkey", columns: ["assessmentId"], references: { schema: "public", table: "assessment", columns: ["id"] }, onDelete: "cascade" } }),
+    this.addForeignKey({ schema: "public", table: "result", foreignKey: { name: "result_attemptId_fkey", columns: ["attemptId"], references: { schema: "public", table: "attempt", columns: ["id"] }, onDelete: "cascade" } }),
+    this.addForeignKey({ schema: "public", table: "submission", foreignKey: { name: "submission_attemptId_fkey", columns: ["attemptId"], references: { schema: "public", table: "attempt", columns: ["id"] }, onDelete: "cascade" } }),
+    this.addForeignKey({ schema: "public", table: "auditLog", foreignKey: { name: "auditLog_userId_fkey", columns: ["userId"], references: { schema: "public", table: "user", columns: ["id"] }, onDelete: "setNull" } }),
+    ];
+  }
+}
+
+MigrationCLI.run(import.meta.url, M);

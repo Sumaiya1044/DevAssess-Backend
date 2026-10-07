@@ -29,7 +29,40 @@ const updateMyProfile = catchAsync(async (req: AuthenticatedRequest, res: Respon
   });
 });
 
+const getAllUsersForAdmin = catchAsync(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const result = await UserServices.getAllUsersForAdmin();
+
+    return sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Users retrieved successfully",
+      data: result,
+    });
+  },
+);
+
+
+const updateUserRoleForAdmin = catchAsync(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const result = await UserServices.updateUserRoleForAdmin(
+      Number(req.params.id),
+      req.body.role,
+    );
+
+    return sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "User role updated successfully",
+      data: result,
+    });
+  },
+);
+
+
 export const UserControllers = {
   getMyProfile,
   updateMyProfile,
+  getAllUsersForAdmin,
+  updateUserRoleForAdmin,
 };

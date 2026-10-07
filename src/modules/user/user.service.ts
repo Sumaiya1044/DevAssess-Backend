@@ -44,7 +44,48 @@ const updateMyProfile = async (
   return safeUser;
 };
 
+const getAllUsersForAdmin = async () => {
+  const users = await db.orm.public.User
+    .where({ deletedAt: null })
+    .all();
+
+  return users.map(({ passwordHash: _password, ...safeUser }) => safeUser);
+};
+
+
+const updateUserRoleForAdmin = async (
+  userId: number,
+  role: "ADMIN" | "COMPANY" | "CANDIDATE",
+) => {
+  const user = await db.orm.public.User
+    .where({ id: userId })
+    .first();
+
+  if (!user || user.deletedAt) {
+    throw new AppError(404, "User not found");
+  }
+
+  await db.orm.public.User
+    .where({ id: userId })
+    .update({ role });
+
+  const updatedUser = await db.orm.public.User
+    .where({ id: userId })
+    .first();
+
+  if (!updatedUser) {
+    throw new AppError(404, "User not found");
+  }
+
+  const { passwordHash: _password, ...safeUser } = updatedUser;
+
+  return safeUser;
+};
+
+
 export const UserServices = {
   getMyProfile,
   updateMyProfile,
+  getAllUsersForAdmin,
+  updateUserRoleForAdmin,
 };
