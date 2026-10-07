@@ -151,6 +151,10 @@ const refreshAccessToken = async (refreshToken: string) => {
     throw new AppError(401, "User account is not active");
   }
 
+  if (!user) {
+    throw new AppError(500, "Failed to create or retrieve Google user");
+  }
+
   const accessToken = createAccessToken({
     id: user.id,
     name: user.name,
@@ -183,9 +187,121 @@ const logoutUser = async (refreshToken: string) => {
   return null;
 };
 
+
+const googleLogin = async (idToken: string) => {
+  const { OAuth2Client } = await import("google-auth-library");
+
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+
+  if (!clientId) {
+    throw new Error("GOOGLE_CLIENT_ID is not configured");
+  }
+
+  const client = new OAuth2Client(clientId);
+
+  let ticket;
+
+  try {
+    ticket = await client.verifyIdToken({
+      idToken,
+      audience: clientId,
+    });
+  } catch {
+    throw new AppError(401, "Invalid Google ID token");
+  }
+
+  const payload = ticket.getPayload();
+
+  if (!payload?.sub || !payload.email) {
+    throw new AppError(401, "Invalid Google account data");
+  }
+
+  if (!payload.email_verified) {
+    throw new AppError(401, "Google email is not verified");
+  }
+
+  const googleId = payload.sub;
+  const email = payload.email;
+  const name = payload.name ?? email.split("@")[0];
+
+  let user = await db.orm.public.User
+    .where({ googleId })
+    .first();
+
+  if (!user) {
+    user = await db.orm.public.User
+      .where({ email })
+      .first();
+  }
+
+  if (user) {
+    if (user.deletedAt || user.status !== "ACTIVE") {
+      throw new AppError(401, "User account is not active");
+    }
+
+    if (user.role !== "CANDIDATE") {
+      throw new AppError(
+        403,
+        "Google login is available only for candidate accounts",
+      );
+    }
+
+    if (!user.googleId) {
+      user = await db.orm.public.User
+        .where({ id: user.id })
+        .update({ googleId });
+    }
+  } else {
+    user = await db.orm.public.User.create({
+      name,
+      email,
+      googleId,
+      passwordHash: null,
+      role: "CANDIDATE",
+      status: "ACTIVE",
+    });
+  }
+
+  if (!user) {
+    throw new AppError(500, "Failed to create or retrieve Google user");
+  }
+
+  const accessToken = createAccessToken({
+    id: user.id,
+    name: user.name,
+    role: user.role,
+  });
+
+  const refreshToken = createRefreshToken({
+    id: user.id,
+  });
+
+  const tokenHash = hashToken(refreshToken);
+
+  const expiresAt = new Date(
+    Date.now() + 30 * 24 * 60 * 60 * 1000,
+  ).toISOString();
+
+  await db.orm.public.RefreshToken.create({
+    userId: user.id,
+    tokenHash,
+    expiresAt,
+  });
+
+  const { passwordHash: _password, ...safeUser } = user;
+
+  return {
+    accessToken,
+    refreshToken,
+    user: safeUser,
+  };
+};
+
+
 export const AuthServices = {
   registerUser,
   loginUser,
+  googleLogin,
   refreshAccessToken,
   logoutUser,
 };

@@ -1,7 +1,9 @@
 import { Router } from "express";
 import validateRequest from "../middleware/validateRequest.js";
 import { AuthControllers } from "../modules/auth/auth.controller.js";
+import { GoogleAuthControllers } from "../modules/auth/google.controller.js";
 import {
+  googleLoginSchema,
   loginSchema,
   refreshTokenSchema,
   registerSchema,
@@ -19,6 +21,22 @@ router.post(
   "/login",
   validateRequest(loginSchema),
   AuthControllers.login,
+);
+
+router.post(
+  "/google",
+  validateRequest(googleLoginSchema),
+  AuthControllers.googleLogin,
+);
+
+router.get(
+  "/google",
+  GoogleAuthControllers.startGoogleLogin,
+);
+
+router.get(
+  "/google/callback",
+  GoogleAuthControllers.googleCallback,
 );
 
 router.post(

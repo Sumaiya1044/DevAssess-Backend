@@ -17,11 +17,12 @@ import userRoutes from "./routes/user.routes.js";
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: { directives: { "script-src": ["'self'", "https://accounts.google.com", "'unsafe-inline'"], "frame-src": ["https://accounts.google.com"], "connect-src": ["'self'", "https://accounts.google.com"] } } }));
 
 app.use(cors());
 
 app.use(express.json());
+app.use(express.static("public"));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -45,6 +46,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/v1/auth", authRoutes);
 
 app.use("/api/issues", issuesRoutes);
 app.use("/api/v1/assessments", assessmentRoutes);

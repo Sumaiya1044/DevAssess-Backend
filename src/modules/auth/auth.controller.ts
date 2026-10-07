@@ -24,6 +24,17 @@ const login = async (req: Request, res: Response) => {
   });
 };
 
+const googleLogin = async (req: Request, res: Response) => {
+  const result = await AuthServices.googleLogin(req.body.idToken);
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Google login successful",
+    data: result,
+  });
+};
+
 const logout = async (req: Request, res: Response) => {
   await AuthServices.logoutUser(req.body.refreshToken);
 
@@ -49,6 +60,7 @@ const refreshToken = async (req: Request, res: Response) => {
 export const AuthControllers = {
   signup,
   login,
+  googleLogin,
   refreshToken,
   logout,
 };
