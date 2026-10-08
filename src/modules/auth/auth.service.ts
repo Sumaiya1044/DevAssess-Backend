@@ -60,6 +60,7 @@ const loginUser = async (payload: LoginPayload) => {
     .where({ email: payload.email })
     .first();
 
+
   if (!user) {
     throw new AppError(401, "Invalid email or password");
   }
@@ -151,6 +152,7 @@ const refreshAccessToken = async (refreshToken: string) => {
     throw new AppError(401, "User account is not active");
   }
 
+
   if (!user) {
     throw new AppError(500, "Failed to create or retrieve Google user");
   }
@@ -228,11 +230,6 @@ const googleLogin = async (idToken: string) => {
     .where({ googleId })
     .first();
 
-  if (!user) {
-    user = await db.orm.public.User
-      .where({ email })
-      .first();
-  }
 
   if (user) {
     if (user.deletedAt || user.status !== "ACTIVE") {
@@ -261,6 +258,7 @@ const googleLogin = async (idToken: string) => {
       status: "ACTIVE",
     });
   }
+
 
   if (!user) {
     throw new AppError(500, "Failed to create or retrieve Google user");
