@@ -14,6 +14,7 @@ import attemptRoutes from "./routes/attempt.routes.js";
 import submissionRoutes from "./routes/submission.routes.js";
 import resultRoutes from "./routes/result.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import auditLogRoutes from "./routes/auditLog.routes.js";
 import paymentRoutes from "./modules/payment/payment.route.js";
 
 const app = express();
@@ -57,6 +58,7 @@ app.use("/api/v1/invitations", invitationRoutes);
 app.use("/api/v1/attempts", attemptRoutes);
 app.use("/api/v1/submissions", submissionRoutes);
 app.use("/api/v1/results", resultRoutes);
+app.use("/api/v1/audit-logs", auditLogRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/payments", paymentRoutes);
 

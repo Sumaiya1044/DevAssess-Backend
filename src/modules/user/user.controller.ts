@@ -2,6 +2,7 @@ import { Response } from "express";
 import { AuthenticatedRequest } from "../../middleware/auth.js";
 import sendResponse from "../../utils/sendResponse.js";
 import catchAsync from "../../utils/catchAsync.js";
+import { createAuditLog } from "../auditLog.service.js";
 import { UserServices } from "./user.service.js";
 
 const getMyProfile = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
@@ -45,6 +46,7 @@ const getAllUsersForAdmin = catchAsync(
 
 const updateUserRoleForAdmin = catchAsync(
   async (req: AuthenticatedRequest, res: Response) => {
+    await createAuditLog({ actorId: req.user!.id, action: "UPDATE_USER_ROLE", entityType: "User", entityId: String(req.params.id), ipAddress: req.ip, userAgent: req.get("user-agent") });
     const result = await UserServices.updateUserRoleForAdmin(
       Number(req.params.id),
       req.body.role,

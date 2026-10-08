@@ -17,3 +17,9 @@ export const createAuditLog = async (data: {
     userAgent: data.userAgent,
   });
 };
+
+export const getAllAuditLogs = async () => {
+  return db.orm.public.AuditLog
+    .orderBy((log) => log.createdAt.desc())
+    .all();
+};
