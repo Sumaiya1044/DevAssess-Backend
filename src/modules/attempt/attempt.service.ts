@@ -78,53 +78,60 @@ const startAttempt = async (
     throw new AppError(400, "Assessment invitation has expired");
   }
 
-  const attempts = await db.orm.public.Attempt
-    .where({
-      assessmentId: payload.assessmentId,
-      candidateId,
-    })
-    .all();
+  return db.transaction(async (tx) => {
+    const attempts = await tx.orm.public.Attempt
+      .where({
+        assessmentId: payload.assessmentId,
+        candidateId,
+      })
+      .all();
 
-  const activeAttempt = attempts.find(
-    (attempt) => attempt.status === "IN_PROGRESS",
-  );
+    const activeAttempt = attempts.find(
+      (attempt) => attempt.status === "IN_PROGRESS",
+    );
 
-  if (activeAttempt) {
-    return activeAttempt;
-  }
+    if (activeAttempt) {
+      return activeAttempt;
+    }
 
-  const completedAttempts = attempts.filter(
-    (attempt) =>
-      attempt.status === "SUBMITTED" || attempt.status === "EXPIRED",
-  );
+    const completedAttempts = attempts.filter(
+      (attempt) =>
+        attempt.status === "SUBMITTED" || attempt.status === "EXPIRED",
+    );
 
-  if (completedAttempts.length >= assessment.maxAttempts) {
-    throw new AppError(400, "Maximum attempt limit has been reached");
-  }
+    if (completedAttempts.length >= assessment.maxAttempts) {
+      throw new AppError(400, "Maximum attempt limit has been reached");
+    }
 
-  const attemptNumber = attempts.length + 1;
-  const startedAt = new Date();
-  const expiresAt = new Date(
-    startedAt.getTime() + assessment.durationMinutes * 60 * 1000,
-  );
+    const attemptNumber = attempts.length + 1;
+    const startedAt = new Date();
+    const expiresAt = new Date(
+      startedAt.getTime() + assessment.durationMinutes * 60 * 1000,
+    );
 
-  if (
-    assessment.endsAt &&
-    expiresAt.getTime() > new Date(assessment.endsAt).getTime()
-  ) {
-    expiresAt.setTime(new Date(assessment.endsAt).getTime());
-  }
+    if (
+      assessment.endsAt &&
+      expiresAt.getTime() > new Date(assessment.endsAt).getTime()
+    ) {
+      expiresAt.setTime(new Date(assessment.endsAt).getTime());
+    }
 
-  const attempt = await db.orm.public.Attempt.create({
-    assessmentId: payload.assessmentId,
-    candidateId,
-    attemptNumber,
-    status: "IN_PROGRESS",
-    startedAt: startedAt.toISOString(),
-    expiresAt: expiresAt.toISOString(),
+    try {
+      return await tx.orm.public.Attempt.create({
+        assessmentId: payload.assessmentId,
+        candidateId,
+        attemptNumber,
+        status: "IN_PROGRESS",
+        startedAt: startedAt.toISOString(),
+        expiresAt: expiresAt.toISOString(),
+      });
+    } catch (error) {
+      throw new AppError(
+        409,
+        "Unable to start attempt because another attempt was created concurrently",
+      );
+    }
   });
-
-  return attempt;
 };
 
 const getMyAttempt = async (
@@ -198,6 +205,12 @@ const submitAttempt = async (
   let maxScore = 0;
   let hasPendingEvaluation = false;
 
+  const evaluatedSubmissions: Array<{
+    id: number;
+    score: number;
+    feedback: string;
+  }> = [];
+
   for (const assessmentQuestion of assessmentQuestions) {
     const question = await db.orm.public.Question
       .where({ id: assessmentQuestion.questionId })
@@ -233,15 +246,11 @@ const submitAttempt = async (
 
       const score = isCorrect ? marks : 0;
 
-      await db.orm.public.Submission
-        .where({ id: submission.id })
-        .update({
-          score,
-          feedback: isCorrect ? "Correct answer" : "Incorrect answer",
-          status: "EVALUATED",
-          evaluatedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
+      evaluatedSubmissions.push({
+        id: submission.id,
+        score,
+        feedback: isCorrect ? "Correct answer" : "Incorrect answer",
+      });
 
       totalScore += score;
     } else {
@@ -260,50 +269,64 @@ const submitAttempt = async (
 
   const submittedAt = new Date().toISOString();
 
-  await db.orm.public.Attempt
-    .where({ id: attempt.id })
-    .update({
-      status: "SUBMITTED",
-      submittedAt,
-      score: totalScore,
-    });
+  return db.transaction(async (tx) => {
+    for (const submission of evaluatedSubmissions) {
+      await tx.orm.public.Submission
+        .where({ id: submission.id })
+        .update({
+          score: submission.score,
+          feedback: submission.feedback,
+          status: "EVALUATED",
+          evaluatedAt: submittedAt,
+          updatedAt: submittedAt,
+        });
+    }
 
-  const existingResult = await db.orm.public.Result
-    .where({ attemptId: attempt.id })
-    .first();
-
-  let result;
-
-  if (existingResult) {
-    result = await db.orm.public.Result
-      .where({ attemptId: attempt.id })
+    await tx.orm.public.Attempt
+      .where({ id: attempt.id })
       .update({
+        status: "SUBMITTED",
+        submittedAt,
+        score: totalScore,
+      });
+
+    const existingResult = await tx.orm.public.Result
+      .where({ attemptId: attempt.id })
+      .first();
+
+    let result;
+
+    if (existingResult) {
+      result = await tx.orm.public.Result
+        .where({ attemptId: attempt.id })
+        .update({
+          totalScore,
+          maxScore,
+          percentage,
+          passed,
+          updatedAt: submittedAt,
+        });
+    } else {
+      result = await tx.orm.public.Result.create({
+        attemptId: attempt.id,
         totalScore,
         maxScore,
         percentage,
         passed,
         updatedAt: submittedAt,
       });
-  } else {
-    result = await db.orm.public.Result.create({
+    }
+
+    return {
       attemptId: attempt.id,
+      status: "SUBMITTED",
       totalScore,
       maxScore,
       percentage,
       passed,
-      updatedAt: submittedAt,
-    });
-  }
-
-  return {
-    attemptId: attempt.id,
-    status: "SUBMITTED",
-    totalScore,
-    maxScore,
-    percentage,
-    passed,
-    result,
-  };
+      result,
+    };
+  });
 };
 
 export const AttemptServices = {
