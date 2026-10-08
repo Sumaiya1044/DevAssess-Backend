@@ -58,13 +58,29 @@ const createAssessment = async (
   return assessment;
 };
 
-const getAllAssessments = async () => {
-  const assessments = await db.orm.public.Assessment
+const getAllAssessments = async (query: { page?: number; limit?: number; search?: string; status?: string; sort?: "asc" | "desc" }) => {
+  const page = Math.max(1, query.page ?? 1);
+  const limit = Math.min(50, Math.max(1, query.limit ?? 10));
+  const offset = (page - 1) * limit;
+
+  let assessments = await db.orm.public.Assessment
     .where({ deletedAt: null })
-    .orderBy((assessment) => assessment.createdAt.desc())
+    .orderBy((assessment) => query.sort === "asc" ? assessment.createdAt.asc() : assessment.createdAt.desc())
     .all();
 
-  return assessments;
+  if (query.status) {
+    assessments = assessments.filter((assessment) => assessment.status === query.status);
+  }
+
+  if (query.search) {
+    const search = query.search.toLowerCase();
+    assessments = assessments.filter((assessment) => assessment.title.toLowerCase().includes(search) || assessment.description?.toLowerCase().includes(search));
+  }
+
+  const total = assessments.length;
+  const data = assessments.slice(offset, offset + limit);
+
+  return { data, meta: { page, limit, total, totalPages: Math.ceil(total / limit) } };
 };
 
 const getSingleAssessment = async (assessmentId: number) => {

@@ -25,7 +25,7 @@ const getAllAssessments = async (
   _req: Request,
   res: Response,
 ) => {
-  const result = await AssessmentServices.getAllAssessments();
+  const result = await AssessmentServices.getAllAssessments({ page: Number(_req.query.page) || 1, limit: Number(_req.query.limit) || 10, search: _req.query.search as string, status: _req.query.status as string, sort: _req.query.sort as "asc" | "desc" });
 
   return sendResponse(res, {
     statusCode: 200,

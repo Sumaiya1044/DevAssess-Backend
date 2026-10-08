@@ -1,4 +1,5 @@
 import { db } from "../../prisma/db.js";
+import { createAuditLog } from "../auditLog.service.js";
 import AppError from "../../utils/AppError.js";
 
 const getMyProfile = async (userId: number) => {
