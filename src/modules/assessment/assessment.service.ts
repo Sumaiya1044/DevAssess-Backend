@@ -1,5 +1,6 @@
 import { db } from "../../prisma/db.js";
 import AppError from "../../utils/AppError.js";
+import redis from "../../config/redis.js";
 
 type UserRole = "ADMIN" | "COMPANY";
 
@@ -23,6 +24,8 @@ interface UpdateAssessmentPayload {
   startsAt?: string;
   endsAt?: string;
 }
+
+const ASSESSMENT_CACHE_KEY = "assessments:all";
 
 const createAssessment = async (
   payload: CreateAssessmentPayload,
@@ -55,32 +58,73 @@ const createAssessment = async (
     price: payload.price ?? 0,
   });
 
+  await redis.del(ASSESSMENT_CACHE_KEY);
+
   return assessment;
 };
 
-const getAllAssessments = async (query: { page?: number; limit?: number; search?: string; status?: string; sort?: "asc" | "desc" }) => {
+const getAllAssessments = async (query: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  sort?: "asc" | "desc";
+}) => {
   const page = Math.max(1, query.page ?? 1);
   const limit = Math.min(50, Math.max(1, query.limit ?? 10));
   const offset = (page - 1) * limit;
 
+  const cacheKey = `${ASSESSMENT_CACHE_KEY}:${page}:${limit}:${query.search ?? ""}:${query.status ?? ""}:${query.sort ?? "desc"}`;
+
+  const cached = await redis.get(cacheKey);
+
+  if (cached) {
+    return JSON.parse(cached);
+  }
+
   let assessments = await db.orm.public.Assessment
     .where({ deletedAt: null })
-    .orderBy((assessment) => query.sort === "asc" ? assessment.createdAt.asc() : assessment.createdAt.desc())
+    .orderBy((assessment) =>
+      query.sort === "asc"
+        ? assessment.createdAt.asc()
+        : assessment.createdAt.desc()
+    )
     .all();
 
   if (query.status) {
-    assessments = assessments.filter((assessment) => assessment.status === query.status);
+    assessments = assessments.filter(
+      (assessment) => assessment.status === query.status,
+    );
   }
 
   if (query.search) {
     const search = query.search.toLowerCase();
-    assessments = assessments.filter((assessment) => assessment.title.toLowerCase().includes(search) || assessment.description?.toLowerCase().includes(search));
+
+    assessments = assessments.filter(
+      (assessment) =>
+        assessment.title.toLowerCase().includes(search) ||
+        assessment.description?.toLowerCase().includes(search),
+    );
   }
 
   const total = assessments.length;
   const data = assessments.slice(offset, offset + limit);
 
-  return { data, meta: { page, limit, total, totalPages: Math.ceil(total / limit) } };
+  const result = {
+    data,
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+
+  await redis.set(cacheKey, JSON.stringify(result), {
+    EX: 60,
+  });
+
+  return result;
 };
 
 const getSingleAssessment = async (assessmentId: number) => {
@@ -151,6 +195,8 @@ const updateAssessment = async (
     throw new AppError(500, "Failed to update assessment");
   }
 
+  await redis.del(ASSESSMENT_CACHE_KEY);
+
   return updatedAssessment;
 };
 
@@ -188,6 +234,8 @@ const deleteAssessment = async (
     throw new AppError(500, "Failed to delete assessment");
   }
 
+  await redis.del(ASSESSMENT_CACHE_KEY);
+
   return null;
 };
 
@@ -212,7 +260,10 @@ const publishAssessment = async (
     }
 
     if (company.ownerId !== userId) {
-      throw new AppError(403, "You can only publish assessments for your own company");
+      throw new AppError(
+        403,
+        "You can only publish assessments for your own company",
+      );
     }
   }
 
@@ -221,7 +272,10 @@ const publishAssessment = async (
     .all();
 
   if (questions.length === 0) {
-    throw new AppError(400, "Add at least one problem before publishing the assessment");
+    throw new AppError(
+      400,
+      "Add at least one problem before publishing the assessment",
+    );
   }
 
   const publishedAssessment = await db.orm.public.Assessment
@@ -235,6 +289,8 @@ const publishAssessment = async (
     throw new AppError(500, "Failed to publish assessment");
   }
 
+  await redis.del(ASSESSMENT_CACHE_KEY);
+
   return publishedAssessment;
 };
 
@@ -243,5 +299,6 @@ export const AssessmentServices = {
   getAllAssessments,
   getSingleAssessment,
   updateAssessment,
-  deleteAssessment, publishAssessment,
+  deleteAssessment,
+  publishAssessment,
 };
