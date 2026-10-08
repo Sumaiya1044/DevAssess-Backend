@@ -76,7 +76,15 @@ const getAllAssessments = async (query: {
 
   const cacheKey = `${ASSESSMENT_CACHE_KEY}:${page}:${limit}:${query.search ?? ""}:${query.status ?? ""}:${query.sort ?? "desc"}`;
 
-  const cached = await redis.get(cacheKey);
+  let cached: string | null = null;
+
+  try {
+    if (redis.isReady) {
+      cached = await redis.get(cacheKey);
+    }
+  } catch (error) {
+    console.warn("Redis cache read failed. Continuing without cache.");
+  }
 
   if (cached) {
     return JSON.parse(cached);
@@ -120,9 +128,13 @@ const getAllAssessments = async (query: {
     },
   };
 
-  await redis.set(cacheKey, JSON.stringify(result), {
-    EX: 60,
-  });
+  try {
+    if (redis.isReady) {
+      await redis.set(cacheKey, JSON.stringify(result), { EX: 60 });
+    }
+  } catch (error) {
+    console.warn("Redis cache write failed. Continuing without cache.");
+  }
 
   return result;
 };

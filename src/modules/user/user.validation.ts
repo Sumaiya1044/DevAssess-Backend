@@ -13,3 +13,12 @@ export const updateMyProfileSchema = z.object({
       },
     ),
 });
+
+export const updateUserRoleSchema = z.object({
+  params: z.object({
+    id: z.coerce.number().int().positive("User ID must be a positive number"),
+  }),
+  body: z.object({
+    role: z.enum(["ADMIN", "COMPANY", "CANDIDATE"]),
+  }),
+});
