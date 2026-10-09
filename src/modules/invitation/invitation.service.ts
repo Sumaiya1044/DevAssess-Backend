@@ -23,6 +23,13 @@ const createInvitation = async (
     throw new AppError(404, "Assessment not found");
   }
 
+  if (assessment.status !== "PUBLISHED") {
+    throw new AppError(
+      400,
+      "Invitations can only be sent for published assessments",
+    );
+  }
+
   if (invitedByRole === "COMPANY") {
     const company = await db.orm.public.Company
       .where({ id: assessment.companyId })

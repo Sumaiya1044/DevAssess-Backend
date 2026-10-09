@@ -29,9 +29,11 @@ const auth = (
       });
     }
 
-    const token = authorization.startsWith("Bearer ")
-      ? authorization.slice(7)
-      : authorization;
+    if (!authorization.startsWith("Bearer ")) {
+      return res.status(401).json({ success: false, message: "Bearer token is required", errors: [] });
+    }
+
+    const token = authorization.slice(7);
 
     const secret = process.env.JWT_ACCESS_SECRET;
 

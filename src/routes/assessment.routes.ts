@@ -33,6 +33,7 @@ router.post(
 
 router.get(
   "/",
+  validateRequest(AssessmentValidations.assessmentListQuerySchema),
   AssessmentControllers.getAllAssessments,
 );
 

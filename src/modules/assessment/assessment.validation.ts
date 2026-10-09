@@ -38,8 +38,19 @@ const assessmentIdSchema = z.object({
   }),
 });
 
+const assessmentListQuerySchema = z.object({
+  query: z.object({
+    page: z.coerce.number().int().positive().optional(),
+    limit: z.coerce.number().int().positive().max(50).optional(),
+    search: z.string().max(200).optional(),
+    status: z.string().optional(),
+    sort: z.enum(["asc", "desc"]).optional(),
+  }),
+});
+
 export const AssessmentValidations = {
   createAssessmentSchema,
   updateAssessmentSchema,
   assessmentIdSchema,
+  assessmentListQuerySchema,
 };

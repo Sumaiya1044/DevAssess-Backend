@@ -11,6 +11,7 @@ router.get(
   "/attempt/:attemptId",
   auth,
   authorize("CANDIDATE"),
+  validateRequest(ResultValidations.attemptIdSchema),
   ResultControllers.getMyResultByAttempt,
 );
 

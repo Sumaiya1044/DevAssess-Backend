@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+const companyIdSchema = z.object({
+  params: z.object({
+    id: z.coerce.number().int().positive("Company ID must be a positive number"),
+  }),
+});
+
 const createCompanySchema = z.object({
   body: z.object({
     name: z.string().min(2).max(200),
@@ -25,6 +31,7 @@ const updateCompanySchema = z.object({
 });
 
 export const CompanyValidations = {
+  companyIdSchema,
   createCompanySchema,
   updateCompanySchema,
 };

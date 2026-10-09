@@ -11,6 +11,7 @@ router.get(
   "/:id",
   auth,
   authorize("COMPANY", "ADMIN"),
+  validateRequest(CompanyValidations.companyIdSchema),
   CompanyControllers.getCompanyById,
 );
 
@@ -26,6 +27,7 @@ router.patch(
   "/:id",
   auth,
   authorize("COMPANY", "ADMIN"),
+  validateRequest(CompanyValidations.companyIdSchema),
   validateRequest(CompanyValidations.updateCompanySchema),
   CompanyControllers.updateCompany,
 );
@@ -34,6 +36,7 @@ router.delete(
   "/:id",
   auth,
   authorize("COMPANY", "ADMIN"),
+  validateRequest(CompanyValidations.companyIdSchema),
   CompanyControllers.deleteCompany,
 );
 
