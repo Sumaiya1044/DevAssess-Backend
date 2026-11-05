@@ -1,0 +1,1066 @@
+]633;E;{ echo "=== STRUCTURE ==="\x3b find . \\( -path ./node_modules -o -path ./.git -o -path ./dist \\) -prune -o -type f -print | sort\x3b echo\x3b echo "=== package.json ==="\x3b cat package.json\x3b echo\x3b echo "=== PRISMA FILES ==="\x3b find . -name "*.prisma" -not -path "./node_modules/*" -exec sh -c 'echo "--- $1 ---"\x3b cat "$1"' _ {} \\\x3b\x3b echo\x3b echo "=== ROUTES ==="\x3b grep -rnE "router\\.(get|post|put|patch|delete)|\\.use\\(" src --include=*.ts\x3b echo\x3b echo "=== ENV KEYS (values hidden) ==="\x3b sed 's/=.*/=***/' .env 2>/dev/null\x3b echo\x3b echo "=== GIT ==="\x3b echo "Total commits: $(git log --oneline | wc -l)"\x3b git log --oneline | head -30\x3b } > project-summary.txt;2b826be4-7820-46de-876d-b77920292b02]633;C=== STRUCTURE ===
+./.agents/skills/prisma-8/references/build.md
+./.agents/skills/prisma-8/references/contract.md
+./.agents/skills/prisma-8/references/debug.md
+./.agents/skills/prisma-8/references/feedback.md
+./.agents/skills/prisma-8/references/migration-model.md
+./.agents/skills/prisma-8/references/migration-review.md
+./.agents/skills/prisma-8/references/migrations.md
+./.agents/skills/prisma-8/references/queries.md
+./.agents/skills/prisma-8/references/queries-mongo.md
+./.agents/skills/prisma-8/references/queries-postgres.md
+./.agents/skills/prisma-8/references/quickstart.md
+./.agents/skills/prisma-8/references/runtime.md
+./.agents/skills/prisma-8/references/supabase.md
+./.agents/skills/prisma-8/references/upgrade-app.md
+./.agents/skills/prisma-8/references/upgrade-extension.md
+./.agents/skills/prisma-8/SKILL.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.10-to-0.11/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/re-emit-closed-mongo-contracts.ts
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/re-emit-domain-namespaced-contracts.ts
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/re-emit-postgres-public-default.ts
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/strip-migration-labels-hints.ts
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.12-to-0.13/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.12-to-0.13/re-emit-mti-variant-link-columns.ts
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.13-to-0.14/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.13-to-0.14/migration-op-factories-to-methods.ts
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.13-to-0.14/uuid-preset-rename.ts
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.14-to-0.15/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.15-to-0.16/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.16-to-0.17/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.16-to-0.17/strip-sha256-hash-prefixes.ts
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.17-to-8.0.0-rc.1/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.7-to-0.8/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.8-to-0.9/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.8-to-0.9/strip-inline-contracts.ts
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.9-to-0.10/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/0.9-to-0.10/stamp-storage-types-kind.ts
+./.agents/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.10-to-8.0.0-rc.11/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.1-to-8.0.0-rc.2/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.2-to-8.0.0-rc.3/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.3-to-8.0.0-rc.4/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.4-to-8.0.0-rc.5/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.5-to-8.0.0-rc.6/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.6-to-8.0.0-rc.7/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.7-to-8.0.0-rc.8/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.8-to-8.0.0-rc.9/instructions.md
+./.agents/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.9-to-8.0.0-rc.10/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.10-to-0.11/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/migrate-contract-testing-imports.ts
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/regenerate-extension-public-baseline.ts
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/strip-migration-labels-hints.ts
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.12-to-0.13/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.13-to-0.14/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.13-to-0.14/migration-op-factories-to-methods.ts
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.13-to-0.14/uuid-preset-rename.ts
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.14-to-0.15/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.15-to-0.16/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.16-to-0.17/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.16-to-0.17/strip-sha256-hash-prefixes.ts
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.17-to-8.0.0-rc.1/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.7-to-0.8/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.8-to-0.9/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.8-to-0.9/strip-inline-contracts.ts
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.9-to-0.10/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/0.9-to-0.10/stamp-storage-types-kind.ts
+./.agents/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.10-to-8.0.0-rc.11/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.1-to-8.0.0-rc.2/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.2-to-8.0.0-rc.3/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.3-to-8.0.0-rc.4/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.4-to-8.0.0-rc.5/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.5-to-8.0.0-rc.6/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.6-to-8.0.0-rc.7/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.7-to-8.0.0-rc.8/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.8-to-8.0.0-rc.9/instructions.md
+./.agents/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.9-to-8.0.0-rc.10/instructions.md
+./.agents/skills/prisma-composer-core-concepts/SKILL.md
+./.agents/skills/prisma-platform-core-concepts/SKILL.md
+./.claude/skills/prisma-8/references/build.md
+./.claude/skills/prisma-8/references/contract.md
+./.claude/skills/prisma-8/references/debug.md
+./.claude/skills/prisma-8/references/feedback.md
+./.claude/skills/prisma-8/references/migration-model.md
+./.claude/skills/prisma-8/references/migration-review.md
+./.claude/skills/prisma-8/references/migrations.md
+./.claude/skills/prisma-8/references/queries.md
+./.claude/skills/prisma-8/references/queries-mongo.md
+./.claude/skills/prisma-8/references/queries-postgres.md
+./.claude/skills/prisma-8/references/quickstart.md
+./.claude/skills/prisma-8/references/runtime.md
+./.claude/skills/prisma-8/references/supabase.md
+./.claude/skills/prisma-8/references/upgrade-app.md
+./.claude/skills/prisma-8/references/upgrade-extension.md
+./.claude/skills/prisma-8/SKILL.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.10-to-0.11/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/re-emit-closed-mongo-contracts.ts
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/re-emit-domain-namespaced-contracts.ts
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/re-emit-postgres-public-default.ts
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/strip-migration-labels-hints.ts
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.12-to-0.13/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.12-to-0.13/re-emit-mti-variant-link-columns.ts
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.13-to-0.14/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.13-to-0.14/migration-op-factories-to-methods.ts
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.13-to-0.14/uuid-preset-rename.ts
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.14-to-0.15/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.15-to-0.16/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.16-to-0.17/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.16-to-0.17/strip-sha256-hash-prefixes.ts
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.17-to-8.0.0-rc.1/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.7-to-0.8/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.8-to-0.9/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.8-to-0.9/strip-inline-contracts.ts
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.9-to-0.10/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/0.9-to-0.10/stamp-storage-types-kind.ts
+./.claude/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.10-to-8.0.0-rc.11/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.1-to-8.0.0-rc.2/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.2-to-8.0.0-rc.3/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.3-to-8.0.0-rc.4/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.4-to-8.0.0-rc.5/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.5-to-8.0.0-rc.6/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.6-to-8.0.0-rc.7/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.7-to-8.0.0-rc.8/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.8-to-8.0.0-rc.9/instructions.md
+./.claude/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.9-to-8.0.0-rc.10/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.10-to-0.11/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/migrate-contract-testing-imports.ts
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/regenerate-extension-public-baseline.ts
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/strip-migration-labels-hints.ts
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.12-to-0.13/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.13-to-0.14/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.13-to-0.14/migration-op-factories-to-methods.ts
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.13-to-0.14/uuid-preset-rename.ts
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.14-to-0.15/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.15-to-0.16/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.16-to-0.17/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.16-to-0.17/strip-sha256-hash-prefixes.ts
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.17-to-8.0.0-rc.1/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.7-to-0.8/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.8-to-0.9/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.8-to-0.9/strip-inline-contracts.ts
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.9-to-0.10/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/0.9-to-0.10/stamp-storage-types-kind.ts
+./.claude/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.10-to-8.0.0-rc.11/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.1-to-8.0.0-rc.2/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.2-to-8.0.0-rc.3/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.3-to-8.0.0-rc.4/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.4-to-8.0.0-rc.5/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.5-to-8.0.0-rc.6/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.6-to-8.0.0-rc.7/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.7-to-8.0.0-rc.8/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.8-to-8.0.0-rc.9/instructions.md
+./.claude/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.9-to-8.0.0-rc.10/instructions.md
+./.claude/skills/prisma-composer-core-concepts/SKILL.md
+./.claude/skills/prisma-platform-core-concepts/SKILL.md
+./.cursor/skills/prisma-8/references/build.md
+./.cursor/skills/prisma-8/references/contract.md
+./.cursor/skills/prisma-8/references/debug.md
+./.cursor/skills/prisma-8/references/feedback.md
+./.cursor/skills/prisma-8/references/migration-model.md
+./.cursor/skills/prisma-8/references/migration-review.md
+./.cursor/skills/prisma-8/references/migrations.md
+./.cursor/skills/prisma-8/references/queries.md
+./.cursor/skills/prisma-8/references/queries-mongo.md
+./.cursor/skills/prisma-8/references/queries-postgres.md
+./.cursor/skills/prisma-8/references/quickstart.md
+./.cursor/skills/prisma-8/references/runtime.md
+./.cursor/skills/prisma-8/references/supabase.md
+./.cursor/skills/prisma-8/references/upgrade-app.md
+./.cursor/skills/prisma-8/references/upgrade-extension.md
+./.cursor/skills/prisma-8/SKILL.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.10-to-0.11/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/re-emit-closed-mongo-contracts.ts
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/re-emit-domain-namespaced-contracts.ts
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/re-emit-postgres-public-default.ts
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/strip-migration-labels-hints.ts
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.12-to-0.13/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.12-to-0.13/re-emit-mti-variant-link-columns.ts
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.13-to-0.14/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.13-to-0.14/migration-op-factories-to-methods.ts
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.13-to-0.14/uuid-preset-rename.ts
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.14-to-0.15/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.15-to-0.16/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.16-to-0.17/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.16-to-0.17/strip-sha256-hash-prefixes.ts
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.17-to-8.0.0-rc.1/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.7-to-0.8/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.8-to-0.9/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.8-to-0.9/strip-inline-contracts.ts
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.9-to-0.10/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/0.9-to-0.10/stamp-storage-types-kind.ts
+./.cursor/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.10-to-8.0.0-rc.11/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.1-to-8.0.0-rc.2/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.2-to-8.0.0-rc.3/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.3-to-8.0.0-rc.4/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.4-to-8.0.0-rc.5/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.5-to-8.0.0-rc.6/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.6-to-8.0.0-rc.7/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.7-to-8.0.0-rc.8/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.8-to-8.0.0-rc.9/instructions.md
+./.cursor/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.9-to-8.0.0-rc.10/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.10-to-0.11/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/migrate-contract-testing-imports.ts
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/regenerate-extension-public-baseline.ts
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/strip-migration-labels-hints.ts
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.12-to-0.13/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.13-to-0.14/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.13-to-0.14/migration-op-factories-to-methods.ts
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.13-to-0.14/uuid-preset-rename.ts
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.14-to-0.15/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.15-to-0.16/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.16-to-0.17/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.16-to-0.17/strip-sha256-hash-prefixes.ts
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.17-to-8.0.0-rc.1/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.7-to-0.8/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.8-to-0.9/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.8-to-0.9/strip-inline-contracts.ts
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.9-to-0.10/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/0.9-to-0.10/stamp-storage-types-kind.ts
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.10-to-8.0.0-rc.11/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.1-to-8.0.0-rc.2/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.2-to-8.0.0-rc.3/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.3-to-8.0.0-rc.4/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.4-to-8.0.0-rc.5/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.5-to-8.0.0-rc.6/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.6-to-8.0.0-rc.7/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.7-to-8.0.0-rc.8/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.8-to-8.0.0-rc.9/instructions.md
+./.cursor/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.9-to-8.0.0-rc.10/instructions.md
+./.cursor/skills/prisma-composer-core-concepts/SKILL.md
+./.cursor/skills/prisma-platform-core-concepts/SKILL.md
+./.devin/skills/prisma-8/references/build.md
+./.devin/skills/prisma-8/references/contract.md
+./.devin/skills/prisma-8/references/debug.md
+./.devin/skills/prisma-8/references/feedback.md
+./.devin/skills/prisma-8/references/migration-model.md
+./.devin/skills/prisma-8/references/migration-review.md
+./.devin/skills/prisma-8/references/migrations.md
+./.devin/skills/prisma-8/references/queries.md
+./.devin/skills/prisma-8/references/queries-mongo.md
+./.devin/skills/prisma-8/references/queries-postgres.md
+./.devin/skills/prisma-8/references/quickstart.md
+./.devin/skills/prisma-8/references/runtime.md
+./.devin/skills/prisma-8/references/supabase.md
+./.devin/skills/prisma-8/references/upgrade-app.md
+./.devin/skills/prisma-8/references/upgrade-extension.md
+./.devin/skills/prisma-8/SKILL.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.10-to-0.11/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/re-emit-closed-mongo-contracts.ts
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/re-emit-domain-namespaced-contracts.ts
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/re-emit-postgres-public-default.ts
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.11-to-0.12/strip-migration-labels-hints.ts
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.12-to-0.13/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.12-to-0.13/re-emit-mti-variant-link-columns.ts
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.13-to-0.14/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.13-to-0.14/migration-op-factories-to-methods.ts
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.13-to-0.14/uuid-preset-rename.ts
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.14-to-0.15/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.15-to-0.16/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.16-to-0.17/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.16-to-0.17/strip-sha256-hash-prefixes.ts
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.17-to-8.0.0-rc.1/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.7-to-0.8/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.8-to-0.9/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.8-to-0.9/strip-inline-contracts.ts
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.9-to-0.10/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/0.9-to-0.10/stamp-storage-types-kind.ts
+./.devin/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.10-to-8.0.0-rc.11/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.1-to-8.0.0-rc.2/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.2-to-8.0.0-rc.3/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.3-to-8.0.0-rc.4/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.4-to-8.0.0-rc.5/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.5-to-8.0.0-rc.6/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.6-to-8.0.0-rc.7/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.7-to-8.0.0-rc.8/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.8-to-8.0.0-rc.9/instructions.md
+./.devin/skills/prisma-8/upgrading/app/upgrades/8.0.0-rc.9-to-8.0.0-rc.10/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.10-to-0.11/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/migrate-contract-testing-imports.ts
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/regenerate-extension-public-baseline.ts
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.11-to-0.12/strip-migration-labels-hints.ts
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.12-to-0.13/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.13-to-0.14/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.13-to-0.14/migration-op-factories-to-methods.ts
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.13-to-0.14/uuid-preset-rename.ts
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.14-to-0.15/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.15-to-0.16/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.16-to-0.17/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.16-to-0.17/strip-sha256-hash-prefixes.ts
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.17-to-8.0.0-rc.1/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.7-to-0.8/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.8-to-0.9/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.8-to-0.9/strip-inline-contracts.ts
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.9-to-0.10/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/0.9-to-0.10/stamp-storage-types-kind.ts
+./.devin/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.10-to-8.0.0-rc.11/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.1-to-8.0.0-rc.2/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.2-to-8.0.0-rc.3/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.3-to-8.0.0-rc.4/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.4-to-8.0.0-rc.5/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.5-to-8.0.0-rc.6/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.6-to-8.0.0-rc.7/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.7-to-8.0.0-rc.8/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.8-to-8.0.0-rc.9/instructions.md
+./.devin/skills/prisma-8/upgrading/extension/upgrades/8.0.0-rc.9-to-8.0.0-rc.10/instructions.md
+./.devin/skills/prisma-composer-core-concepts/SKILL.md
+./.devin/skills/prisma-platform-core-concepts/SKILL.md
+./.env
+./.env.example
+./.gitattributes
+./.gitignore
+./check-company.cjs
+./current-schema.json
+./database-indexes.txt
+./devassess_backup_before_bkash.dump
+./fix-migration.cjs
+./legacy-tables.txt
+./migrations/app/20260921T1745_initial_schema/migration.json
+./migrations/app/20260921T1745_initial_schema/migration.ts
+./migrations/app/20260921T1745_initial_schema/ops.json
+./migrations/app/20260927T1810_sync_devassess_schema/migration.json
+./migrations/app/20260927T1810_sync_devassess_schema/migration.ts
+./migrations/app/20260927T1810_sync_devassess_schema/migration.ts.backup
+./migrations/app/20260927T1810_sync_devassess_schema/migration.ts.before-identity-fix
+./migrations/app/20260927T1810_sync_devassess_schema/migration.ts.before-index-fix
+./migrations/app/20260927T1810_sync_devassess_schema/migration.ts.before-now-fix
+./migrations/app/20260927T1810_sync_devassess_schema/migration.ts.before-return-fix
+./migrations/app/20260927T1810_sync_devassess_schema/migration.ts.before-sequence-fix
+./migrations/app/20260927T1810_sync_devassess_schema/migration.ts.before-type-fix
+./migrations/app/20260927T1810_sync_devassess_schema/migration.ts.debug-backup
+./migrations/app/20260927T1810_sync_devassess_schema/migration.ts.safe
+./migrations/app/20260927T1810_sync_devassess_schema/ops.json
+./migrations/app/20260928T1618_test_drop_constraint/migration.json
+./migrations/app/20260928T1618_test_drop_constraint/migration.ts
+./migrations/app/20260928T1618_test_drop_constraint/ops.json
+./migrations/app/20261102T1533_add_payment_processing_status/migration.json
+./migrations/app/20261102T1533_add_payment_processing_status/migration.ts
+./migrations/app/20261102T1533_add_payment_processing_status/ops.json
+./migrations/app/20261102T1602_add_payment_processing_status_v2/migration.json
+./migrations/app/20261102T1602_add_payment_processing_status_v2/migration.ts
+./migrations/app/20261102T1602_add_payment_processing_status_v2/ops.json
+./migrations/app/refs/db.json
+./migrations/snapshots/1df3c87349b39fd6679ae7b6dc93bf5d853aba5fbe5df16356bc85726d1205fe/contract.d.ts
+./migrations/snapshots/1df3c87349b39fd6679ae7b6dc93bf5d853aba5fbe5df16356bc85726d1205fe/contract.json
+./migrations/snapshots/323d24ab1fff7a9ae8374ffa5c2703ee8a52b6b32bce425be1828dd06774f1f8/contract.d.ts
+./migrations/snapshots/323d24ab1fff7a9ae8374ffa5c2703ee8a52b6b32bce425be1828dd06774f1f8/contract.json
+./migrations/snapshots/a3891f8e7c7dc6da32368f37fe345c710029994c2063ed8922e7bcc81c5a2958/contract.d.ts
+./migrations/snapshots/a3891f8e7c7dc6da32368f37fe345c710029994c2063ed8922e7bcc81c5a2958/contract.json
+./package.json
+./package-lock.json
+./prisma.config.ts
+./prisma/contract.prisma
+./prisma-8.md
+./project-summary.txt
+./public/google-test.html
+./schema-output.json
+./scripts/seed-admin.ts
+./src/app.ts
+./src/config/db.ts
+./src/config/redis.ts
+./src/db/migrations/001_create_users_issues.sql
+./src/middleware/auth.ts
+./src/middleware/authorize.ts
+./src/middleware/globalErrorHandler.ts
+./src/middleware/role.ts
+./src/middleware/validateRequest.ts
+./src/modules/assessment/assessment.controller.ts
+./src/modules/assessment/assessment.service.backup.ts
+./src/modules/assessment/assessment.service.before-publish.ts
+./src/modules/assessment/assessment.service.ts
+./src/modules/assessment/assessment.validation.ts
+./src/modules/assessment/assessmentProblem.controller.ts
+./src/modules/assessment/assessmentProblem.service.ts
+./src/modules/assessment/assessmentProblem.validation.ts
+./src/modules/attempt/attempt.controller.ts
+./src/modules/attempt/attempt.service.ts
+./src/modules/attempt/attempt.validation.ts
+./src/modules/auditLog.controller.ts
+./src/modules/auditLog.service.ts
+./src/modules/auditLog.validation.ts
+./src/modules/auth/auth.controller.ts
+./src/modules/auth/auth.service.ts
+./src/modules/auth/auth.validation.ts
+./src/modules/auth/google.controller.ts
+./src/modules/auth/google.service.ts
+./src/modules/company/company.controller.ts
+./src/modules/company/company.service.ts
+./src/modules/company/company.validation.ts
+./src/modules/invitation/invitation.controller.ts
+./src/modules/invitation/invitation.service.ts
+./src/modules/invitation/invitation.validation.ts
+./src/modules/issues/issues.controller.ts
+./src/modules/issues/issues.service.ts
+./src/modules/issues/issues.validation.ts
+./src/modules/payment/bkash.ts
+./src/modules/payment/payment.controller.ts
+./src/modules/payment/payment.controller.ts.bak
+./src/modules/payment/payment.route.ts
+./src/modules/payment/payment.service.ts
+./src/modules/payment/payment.service.ts.bak
+./src/modules/payment/payment.service.ts.before-verification
+./src/modules/payment/payment.service.ts.pre-bkash-integration
+./src/modules/payment/payment.service.ts.tokenized-backup
+./src/modules/payment/payment.validation.ts
+./src/modules/problem/problem.controller.ts
+./src/modules/problem/problem.service.backup.ts
+./src/modules/problem/problem.service.ts
+./src/modules/problem/problem.validation.ts
+./src/modules/result/result.controller.ts
+./src/modules/result/result.service.ts
+./src/modules/result/result.validation.ts
+./src/modules/submission/submission.controller.ts
+./src/modules/submission/submission.service.ts
+./src/modules/submission/submission.validation.ts
+./src/modules/user/user.controller.ts
+./src/modules/user/user.service.ts
+./src/modules/user/user.validation.ts
+./src/prisma/contract.d.ts
+./src/prisma/contract.d.ts.before-bkash
+./src/prisma/contract.json
+./src/prisma/contract.json.before-bkash
+./src/prisma/contract.prisma
+./src/prisma/contract.prisma.backup
+./src/prisma/contract.prisma.before-submission-default
+./src/prisma/contract.prisma.clean-base
+./src/prisma/contract.prisma.repair-backup
+./src/prisma/db.ts
+./src/routes/assessment.routes.ts
+./src/routes/attempt.routes.ts
+./src/routes/auditLog.routes.ts
+./src/routes/auth.routes.ts
+./src/routes/company.routes.ts
+./src/routes/invitation.routes.ts
+./src/routes/issues.routes.ts
+./src/routes/problem.routes.ts
+./src/routes/result.routes.ts
+./src/routes/submission.routes.ts
+./src/routes/user.routes.ts
+./src/server.ts
+./src/utils/AppError.ts
+./src/utils/catchAsync.ts
+./src/utils/hashToken.ts
+./src/utils/jwt.ts
+./src/utils/refreshToken.ts
+./src/utils/sendResponse.ts
+./tsconfig.json
+./users_backup.sql
+
+=== package.json ===
+{
+  "name": "devassess-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --import=tsx src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "contract:emit": "prisma contract emit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "^7.10.0",
+    "@prisma/orm-postgres": "^8.0.0-rc.12",
+    "axios": "^1.20.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.4",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "google-auth-library": "^11.1.0",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.23.0",
+    "redis": "^6.2.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@prisma/cli-engine": "^0.6.1",
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^26.6.2",
+    "@types/pg": "^8.23.1",
+    "prisma": "^8.0.0-rc.17",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}
+
+=== PRISMA FILES ===
+--- ./prisma/contract.prisma ---
+enum UserRole {
+  ADMIN
+  COMPANY
+  CANDIDATE
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  SUSPENDED
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  name         String
+  email        String     @unique
+  password     String?
+  role         UserRole   @default(CANDIDATE)
+  status       UserStatus @default(ACTIVE)
+  profileImage String?
+  phone        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  company      Company?
+}
+
+model Company {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  website     String?
+  logo        String?
+  ownerId     Int      @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner       User     @relation(fields:[ownerId], references:[id], onDelete: Cascade)
+}
+--- ./src/prisma/contract.prisma ---
+// use prisma-8
+
+enum UserRole {
+  ADMIN
+  COMPANY
+  CANDIDATE
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum AssessmentStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  ARCHIVED
+}
+
+enum QuestionType {
+  MCQ
+  WRITTEN
+  CODING
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum AttemptStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  SUBMITTED
+  EXPIRED
+}
+
+enum SubmissionStatus {
+  PENDING
+  EVALUATED
+  REJECTED
+}
+
+enum PaymentProvider {
+  STRIPE
+  BKASH
+  SSLCOMMERZ
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+model User {
+  id           Int               @id @default(autoincrement())
+  email        String            @unique
+  passwordHash String?           @map("password")
+  googleId     String?           @unique
+  name         String
+  phone        String?
+  role         UserRole          @default(CANDIDATE)
+  status       UserStatus        @default(ACTIVE)
+  deletedAt    TimestamptzString?
+  createdAt    TimestamptzString @default(now())
+  updatedAt    temporal.updatedAtString()
+
+  companyProfile      Company?
+  candidateProfile    CandidateProfile?
+
+  assessmentsCreated  Assessment[] @relation("AssessmentCreator")
+  questionsCreated    Question[]   @relation("QuestionCreator")
+
+  sentInvitations     Invitation[] @relation("InvitationInviter")
+  receivedInvitations Invitation[] @relation("InvitationCandidate")
+
+  attempts            Attempt[]
+  submissions         Submission[]
+  payments            Payment[]
+  refreshTokens       RefreshToken[]
+  auditLogs           AuditLog[]   @relation("AuditActor")
+
+  @@index([role])
+  @@index([status])
+  @@index([deletedAt])
+  @@index([createdAt])
+  @@map("user")
+}
+
+model Company {
+  id          Int               @id @default(autoincrement())
+  ownerId     Int               @unique
+  name        String
+  description String?
+  industry    String?
+  logo        String?
+  website     String?
+  deletedAt   TimestamptzString?
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+
+  owner       User              @relation(fields: [ownerId], references: [id])
+  assessments Assessment[]
+  questions   Question[]
+
+  @@index([name])
+  @@index([deletedAt])
+  @@map("company")
+}
+
+model CandidateProfile {
+  id        Int               @id @default(autoincrement())
+  userId    Int               @unique
+  bio       String?
+  skills    String?
+  resumeUrl String?
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.updatedAtString()
+
+  @@index([userId])
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Assessment {
+  id              Int               @id @default(autoincrement())
+  companyId       Int
+  createdById     Int
+  title           String
+  description     String?
+  status          AssessmentStatus  @default(DRAFT)
+  durationMinutes Int
+  passingScore    Float?
+  maxAttempts     Int               @default(1)
+  price           Float             @default(0)
+  publishedAt     TimestamptzString?
+  startsAt        TimestamptzString?
+  endsAt          TimestamptzString?
+  deletedAt       TimestamptzString?
+  createdAt       TimestamptzString  @default(now())
+  updatedAt       temporal.updatedAtString()
+
+  company        Company             @relation(fields: [companyId], references: [id])
+  createdBy      User                @relation("AssessmentCreator", fields: [createdById], references: [id])
+  questions      AssessmentQuestion[]
+  invitations    Invitation[]
+  attempts       Attempt[]
+  payments       Payment[]
+
+  @@index([companyId])
+  @@index([createdById])
+  @@index([status, createdAt])
+  @@index([deletedAt])
+  @@index([createdAt])
+  @@index([status])
+  @@map("assessment")
+}
+
+model Question {
+  id             Int               @id @default(autoincrement())
+  companyId      Int
+  createdById    Int
+  type           QuestionType
+  title          String
+  description    String
+  marks          Int               @default(1) @map("points")
+  options        Json?
+  expectedAnswer Json?             @map("correctAnswer")
+  solution       String?
+  testCases      Json?
+  deletedAt      TimestamptzString?
+  createdAt      TimestamptzString @default(now())
+  updatedAt      temporal.updatedAtString()
+
+  company      Company               @relation(fields: [companyId], references: [id])
+  createdBy    User                  @relation("QuestionCreator", fields: [createdById], references: [id])
+  assessments  AssessmentQuestion[]
+  submissions  Submission[]
+
+  @@index([companyId])
+  @@index([createdById])
+  @@index([type])
+  @@index([deletedAt])
+  @@index([createdAt])
+  @@map("problem")
+}
+
+model AssessmentQuestion {
+  id             Int          @id @default(autoincrement())
+  assessmentId   Int
+  questionId    Int           @map("problemId")
+  position       Int           @map("order")
+  marksOverride  Int?
+
+  assessment   Assessment   @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  question     Question     @relation(fields: [questionId], references: [id])
+  submissions  Submission[]
+
+  @@unique([assessmentId, questionId])
+  @@unique([assessmentId, position])
+  @@index([assessmentId, position])
+  @@map("assessmentProblem")
+}
+
+model Invitation {
+  id           Int               @id @default(autoincrement())
+  assessmentId Int
+  candidateId  Int
+  invitedById  Int
+  status       InvitationStatus  @default(PENDING)
+  expiresAt    TimestamptzString?
+  respondedAt  TimestamptzString?
+  createdAt    TimestamptzString @default(now())
+  updatedAt    temporal.updatedAtString()
+
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  candidate    User       @relation("InvitationCandidate", fields: [candidateId], references: [id])
+  invitedBy    User       @relation("InvitationInviter", fields: [invitedById], references: [id])
+
+  @@unique([assessmentId, candidateId])
+  @@index([candidateId, status])
+  @@index([assessmentId, status])
+  @@index([expiresAt])
+  @@index([status])
+  @@map("invitation")
+}
+
+model Attempt {
+  id            Int            @id @default(autoincrement())
+  assessmentId  Int
+  candidateId   Int
+  attemptNumber Int            @default(1)
+  status        AttemptStatus  @default(NOT_STARTED)
+  startedAt     TimestamptzString?
+  expiresAt     TimestamptzString?
+  submittedAt   TimestamptzString?
+  score         Float?
+  createdAt     TimestamptzString @default(now())
+  updatedAt     temporal.updatedAtString()
+
+  assessment    Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  candidate     User       @relation(fields: [candidateId], references: [id])
+  submissions   Submission[]
+  result        Result?
+
+  @@unique([assessmentId, candidateId, attemptNumber])
+  @@index([candidateId, status])
+  @@index([assessmentId, status])
+  @@index([createdAt])
+  @@index([expiresAt])
+  @@index([status])
+  @@map("attempt")
+}
+
+model Submission {
+  id                   Int               @id @default(autoincrement())
+  attemptId            Int
+  assessmentQuestionId Int
+  questionId           Int               @map("problemId")
+  candidateId          Int
+  answer               Json?
+  code                 String?
+  language             String?
+  score                Float?
+  feedback             String?
+  status               SubmissionStatus  @default(PENDING)
+  submittedAt          TimestamptzString @default(now())
+  evaluatedAt          TimestamptzString?
+  createdAt            TimestamptzString @default(now())
+  updatedAt            TimestamptzString @default(now())
+
+  attempt             Attempt            @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  assessmentQuestion  AssessmentQuestion @relation(fields: [assessmentQuestionId], references: [id], onDelete: Cascade)
+  question            Question            @relation(fields: [questionId], references: [id])
+  candidate           User               @relation(fields: [candidateId], references: [id])
+
+  @@unique([attemptId, assessmentQuestionId])
+  @@index([attemptId])
+  @@index([candidateId])
+  @@index([questionId])
+  @@index([status])
+  @@map("submission")
+}
+
+model Payment {
+  id                Int               @id @default(autoincrement())
+  userId            Int
+  assessmentId      Int?
+  provider          PaymentProvider   @map("method")
+  status            PaymentStatus     @default(PENDING)
+  amount            Float
+  currency          String            @default("BDT")
+  providerSessionId String?           @map("gatewaySessionId")
+  transactionId     String            @unique
+  providerPaymentId String?
+  metadata          Json?
+  paidAt            TimestamptzString?
+  createdAt         TimestamptzString @default(now())
+  updatedAt         temporal.updatedAtString()
+
+  user       User        @relation(fields: [userId], references: [id])
+  assessment Assessment? @relation(fields: [assessmentId], references: [id])
+
+  @@index([userId, status])
+  @@index([assessmentId])
+  @@index([provider, status])
+  @@index([createdAt])
+  @@index([status])
+  @@map("payment")
+}
+
+model Result {
+  id         Int               @id @default(autoincrement())
+  attemptId  Int               @unique
+  totalScore Float             @default(0) @map("totalScore")
+  maxScore   Float             @default(0)
+  percentage Float             @default(0)
+  passed     Boolean           @default(false)
+  createdAt  TimestamptzString @default(now())
+  updatedAt  temporal.updatedAtString()
+
+  attempt Attempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([passed])
+  @@index([percentage])
+  @@map("result")
+}
+
+model RefreshToken {
+  id        Int               @id @default(autoincrement())
+  userId    Int
+  tokenHash String            @unique
+  expiresAt TimestamptzString
+  revokedAt TimestamptzString?
+  createdAt TimestamptzString @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+}
+
+model AuditLog {
+  id         Int               @id @default(autoincrement())
+  actorId    Int?              @map("userId")
+  action     String
+  entityType String            @map("entity")
+  entityId   String?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  TimestamptzString @default(now())
+
+  actor User? @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([action, createdAt])
+  @@index([createdAt])
+  @@index([action])
+  @@map("auditLog")
+}
+
+model LegacyUser {
+  id        Int               @id @default(autoincrement())
+  name      String
+  email     String            @unique
+  password  String
+  role      String            @default("contributor")
+  createdAt TimestamptzString @default(now()) @map("created_at")
+  updatedAt TimestamptzString @map("updated_at")
+
+  @@map("users")
+}
+
+model Issue {
+  id          Int               @id @default(autoincrement())
+  title       VarChar(150)
+  description String
+  type        String
+  status      String            @default("open")
+  reporterId  Int               @map("reporter_id")
+  createdAt   TimestamptzString @default(now()) @map("created_at")
+  updatedAt   TimestamptzString @default(now()) @map("updated_at")
+
+  @@map("issues")
+}
+
+=== ROUTES ===
+src/app.ts:22:app.use(helmet({ contentSecurityPolicy: { directives: { "script-src": ["'self'", "https://accounts.google.com", "'unsafe-inline'"], "frame-src": ["https://accounts.google.com"], "connect-src": ["'self'", "https://accounts.google.com"] } } }));
+src/app.ts:24:app.use(cors());
+src/app.ts:26:app.use(express.json());
+src/app.ts:27:app.use(express.static("public"));
+src/app.ts:39:app.use(limiter);
+src/app.ts:50:app.use("/api/auth", authRoutes);
+src/app.ts:51:app.use("/api/v1/auth", authRoutes);
+src/app.ts:53:app.use("/api/issues", issuesRoutes);
+src/app.ts:54:app.use("/api/v1/assessments", assessmentRoutes);
+src/app.ts:55:app.use("/api/v1/companies", companyRoutes);
+src/app.ts:56:app.use("/api/v1/problems", problemRoutes);
+src/app.ts:57:app.use("/api/v1/invitations", invitationRoutes);
+src/app.ts:58:app.use("/api/v1/attempts", attemptRoutes);
+src/app.ts:59:app.use("/api/v1/submissions", submissionRoutes);
+src/app.ts:60:app.use("/api/v1/results", resultRoutes);
+src/app.ts:61:app.use("/api/v1/audit-logs", auditLogRoutes);
+src/app.ts:62:app.use("/api/v1/users", userRoutes);
+src/app.ts:63:app.use("/api/v1/payments", paymentRoutes);
+src/app.ts:65:app.use(globalErrorHandler);
+src/modules/payment/payment.route.ts:16:router.post(
+src/modules/payment/payment.route.ts:23:router.post(
+src/modules/payment/payment.route.ts:30:router.get("/:id", auth, getPaymentStatusController);
+src/routes/assessment.routes.ts:12:router.post(
+src/routes/assessment.routes.ts:20:router.get(
+src/routes/assessment.routes.ts:26:router.post(
+src/routes/assessment.routes.ts:34:router.get(
+src/routes/assessment.routes.ts:40:router.get(
+src/routes/assessment.routes.ts:46:router.post(
+src/routes/assessment.routes.ts:54:router.patch(
+src/routes/assessment.routes.ts:62:router.delete(
+src/routes/attempt.routes.ts:10:router.post(
+src/routes/attempt.routes.ts:18:router.post(
+src/routes/attempt.routes.ts:26:router.get(
+src/routes/auditLog.routes.ts:10:router.get(
+src/routes/auth.routes.ts:14:router.post(
+src/routes/auth.routes.ts:20:router.post(
+src/routes/auth.routes.ts:26:router.post(
+src/routes/auth.routes.ts:32:router.get(
+src/routes/auth.routes.ts:37:router.get(
+src/routes/auth.routes.ts:42:router.post(
+src/routes/auth.routes.ts:48:router.post(
+src/routes/company.routes.ts:10:router.get(
+src/routes/company.routes.ts:18:router.post(
+src/routes/company.routes.ts:26:router.patch(
+src/routes/company.routes.ts:35:router.delete(
+src/routes/invitation.routes.ts:10:router.post(
+src/routes/invitation.routes.ts:18:router.get(
+src/routes/invitation.routes.ts:25:router.patch(
+src/routes/issues.routes.ts:15:router.post(
+src/routes/issues.routes.ts:23:router.get(
+src/routes/issues.routes.ts:29:router.get(
+src/routes/issues.routes.ts:35:router.patch(
+src/routes/issues.routes.ts:43:router.delete(
+src/routes/problem.routes.ts:10:router.post(
+src/routes/problem.routes.ts:18:router.get(
+src/routes/problem.routes.ts:24:router.patch(
+src/routes/problem.routes.ts:32:router.delete(
+src/routes/result.routes.ts:10:router.get(
+src/routes/result.routes.ts:18:router.get(
+src/routes/submission.routes.ts:10:router.post(
+src/routes/submission.routes.ts:18:router.get(
+src/routes/user.routes.ts:13:router.get(
+src/routes/user.routes.ts:19:router.patch(
+src/routes/user.routes.ts:26:router.get(
+src/routes/user.routes.ts:33:router.patch(
+
+=== ENV KEYS (values hidden) ===
+
+PORT=***
+
+NODE_ENV=***
+
+DATABASE_URL=***
+
+JWT_ACCESS_SECRET=***
+JWT_ACCESS_EXPIRES_IN=***
+JWT_REFRESH_SECRET=***
+JWT_REFRESH_EXPIRES_IN=***
+
+
+GOOGLE_CLIENT_ID=***
+GOOGLE_REDIRECT_URI=***
+
+CLIENT_ID =***
+GOOGLE_CLIENT_SECRET=***
+
+BKASH_BASE_URL=***
+BKASH_APP_KEY=***
+BKASH_APP_SECRET=***
+BKASH_USERNAME=***
+BKASH_PASSWORD=***
+BKASH_CALLBACK_URL=***
+
+=== GIT ===
+Total commits: 33
+2648c92 improve request validation and authentication
+5032f18 fix attempt transaction race conditions
+ea4ff03 fix authentication null handling
+917d8e5 fix backend caching and user validation
+dbfeee4 add redis caching for assessments
+8505f3d add redis connection
+55b46d5 add audit log tracking
+cbb17c4 add assessment pagination search and filtering
+a1585d6 add admin user management APIs
+b982fa4 fix Google social login OAuth flow
+8e3d739 feat: complete assessment workflow
+c1ad91a feat(problem): add prisma problem management APIs
+5f6b054 feat(company): add soft delete API
+494f392 feat(company): add company update API
+69487a6 feat(company): add create and get company APIs
+51748ac feat: add database migration for assessment platform
+f41a23f feat: update assessment platform database schema
+8ebebfd chore: setup prisma contract generation
+e07e82a refactor: align backend with assignment requirements
+535675d feat: add google oauth login
+18c910b feat: add protected user profile endpoint
+31475dc feat: add jwt auth middleware and role based access control
+c87be7a feat: add jwt access token authentication
+971677f fix: hide password from auth responses
+8af2c09 feat: implement auth registration and login endpoints
+bb43d1f feat: add global error handling
+28f5cc8 feat: add request validation with zod
+11479b7 feat: add global error handling
+2f542a2 feat: add standardized api response
+eb191a7 setup prisma database and backend server

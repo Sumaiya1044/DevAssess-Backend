@@ -36,6 +36,10 @@
       "model": "Invitation",
       "namespace": "public"
     },
+    "issues": {
+      "model": "Issue",
+      "namespace": "public"
+    },
     "payment": {
       "model": "Payment",
       "namespace": "public"
@@ -54,6 +58,10 @@
     },
     "user": {
       "model": "User",
+      "namespace": "public"
+    },
+    "users": {
+      "model": "LegacyUser",
       "namespace": "public"
     }
   },
@@ -147,6 +155,10 @@
               {
                 "name": "PENDING",
                 "value": "PENDING"
+              },
+              {
+                "name": "PROCESSING",
+                "value": "PROCESSING"
               },
               {
                 "name": "PAID",
@@ -1336,6 +1348,181 @@
               "table": "invitation"
             }
           },
+          "Issue": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "description": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "reporterId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "status": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "title": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 150
+                  }
+                }
+              },
+              "type": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "description": {
+                  "column": "description"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "reporterId": {
+                  "column": "reporter_id"
+                },
+                "status": {
+                  "column": "status"
+                },
+                "title": {
+                  "column": "title"
+                },
+                "type": {
+                  "column": "type"
+                },
+                "updatedAt": {
+                  "column": "updated_at"
+                }
+              },
+              "namespaceId": "public",
+              "table": "issues"
+            }
+          },
+          "LegacyUser": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "email": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "password": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "role": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "email": {
+                  "column": "email"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "name": {
+                  "column": "name"
+                },
+                "password": {
+                  "column": "password"
+                },
+                "role": {
+                  "column": "role"
+                },
+                "updatedAt": {
+                  "column": "updated_at"
+                }
+              },
+              "namespaceId": "public",
+              "table": "users"
+            }
+          },
           "Payment": {
             "fields": {
               "amount": {
@@ -2095,6 +2282,22 @@
                   "namespace": "public"
                 }
               },
+              "candidate": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "candidateId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              },
               "question": {
                 "cardinality": "N:1",
                 "nullable": false,
@@ -2408,6 +2611,21 @@
                   "model": "Invitation",
                   "namespace": "public"
                 }
+              },
+              "submissions": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "candidateId"
+                  ]
+                },
+                "to": {
+                  "model": "Submission",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -2523,7 +2741,16 @@
                   }
                 }
               ],
-              "indexes": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "userId"
+                  ],
+                  "name": "CandidateProfile_userId_idx_a489d58a",
+                  "prefix": "CandidateProfile_userId_idx",
+                  "unique": false
+                }
+              ],
               "primaryKey": {
                 "columns": [
                   "id"
@@ -2798,6 +3025,14 @@
                 },
                 {
                   "columns": [
+                    "createdAt"
+                  ],
+                  "name": "assessment_createdAt_idx_9575dbd7",
+                  "prefix": "assessment_createdAt_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
                     "createdById"
                   ],
                   "name": "assessment_createdById_idx_8bf640ed",
@@ -2819,6 +3054,14 @@
                   ],
                   "name": "assessment_status_createdAt_idx_58610442",
                   "prefix": "assessment_status_createdAt_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "status"
+                  ],
+                  "name": "assessment_status_idx_e98638ab",
+                  "prefix": "assessment_status_idx",
                   "unique": false
                 }
               ],
@@ -3107,6 +3350,22 @@
                   "name": "attempt_createdAt_idx_9575dbd7",
                   "prefix": "attempt_createdAt_idx",
                   "unique": false
+                },
+                {
+                  "columns": [
+                    "expiresAt"
+                  ],
+                  "name": "attempt_expiresAt_idx_6b6b8c10",
+                  "prefix": "attempt_expiresAt_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "status"
+                  ],
+                  "name": "attempt_status_idx_e98638ab",
+                  "prefix": "attempt_status_idx",
+                  "unique": false
                 }
               ],
               "primaryKey": {
@@ -3207,6 +3466,14 @@
                   ],
                   "name": "auditLog_action_createdAt_idx_a6d20b4b",
                   "prefix": "auditLog_action_createdAt_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "action"
+                  ],
+                  "name": "auditLog_action_idx_cd0d2116",
+                  "prefix": "auditLog_action_idx",
                   "unique": false
                 },
                 {
@@ -3513,10 +3780,26 @@
                 },
                 {
                   "columns": [
+                    "expiresAt"
+                  ],
+                  "name": "invitation_expiresAt_idx_6b6b8c10",
+                  "prefix": "invitation_expiresAt_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
                     "invitedById"
                   ],
                   "name": "invitation_invitedById_idx_61689f37",
                   "prefix": "invitation_invitedById_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "status"
+                  ],
+                  "name": "invitation_status_idx_e98638ab",
+                  "prefix": "invitation_status_idx",
                   "unique": false
                 }
               ],
@@ -3534,6 +3817,77 @@
                 }
               ]
             },
+            "issues": {
+              "columns": {
+                "created_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "description": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "reporter_id": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "status": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "open"
+                  },
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "title": {
+                  "codecId": "sql/varchar@1",
+                  "nativeType": "character varying",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 150
+                  }
+                },
+                "type": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "updated_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
             "payment": {
               "checks": [
                 {
@@ -3542,8 +3896,8 @@
                   "prefix": "payment_method_check"
                 },
                 {
-                  "expression": "\"status\" IN ('PENDING', 'PAID', 'FAILED', 'CANCELLED', 'REFUNDED')",
-                  "name": "payment_status_check_f11e0b8c",
+                  "expression": "\"status\" IN ('PENDING', 'PROCESSING', 'PAID', 'FAILED', 'CANCELLED', 'REFUNDED')",
+                  "name": "payment_status_check_a4057341",
                   "prefix": "payment_status_check"
                 }
               ],
@@ -3705,6 +4059,14 @@
                   ],
                   "name": "payment_method_status_idx_dc1f05c0",
                   "prefix": "payment_method_status_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "status"
+                  ],
+                  "name": "payment_status_idx_e98638ab",
+                  "prefix": "payment_status_idx",
                   "unique": false
                 },
                 {
@@ -4139,6 +4501,10 @@
                 },
                 "updatedAt": {
                   "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
                   "nativeType": "timestamptz",
                   "nullable": false
                 }
@@ -4192,6 +4558,22 @@
                     ],
                     "namespaceId": "public",
                     "tableName": "problem"
+                  }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "candidateId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "submission"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
                   }
                 }
               ],
@@ -4401,6 +4783,71 @@
                   ]
                 }
               ]
+            },
+            "users": {
+              "columns": {
+                "created_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "email": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "name": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "password": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "role": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "contributor"
+                  },
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "updated_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "email"
+                  ]
+                }
+              ]
             }
           },
           "valueSet": {
@@ -4443,6 +4890,7 @@
               "kind": "valueSet",
               "values": [
                 "PENDING",
+                "PROCESSING",
                 "PAID",
                 "FAILED",
                 "CANCELLED",
@@ -4487,7 +4935,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "a3891f8e7c7dc6da32368f37fe345c710029994c2063ed8922e7bcc81c5a2958"
+    "storageHash": "905de780a1b995a94b985e62b9e6e87bdce74121f2eb01959d1c76c624996f57"
   },
   "execution": {
     "executionHash": "87af4fc1b8198397cff29ea111111620ba90ce28c03b51ecf114a3d680742c18",

@@ -4,6 +4,7 @@ import validateRequest from "../../middleware/validateRequest.js";
 import {
   initiatePayment,
   executePayment,
+  getPaymentStatusController,
 } from "./payment.controller.js";
 import {
   initiatePaymentSchema,
@@ -25,5 +26,7 @@ router.post(
   validateRequest(executePaymentSchema),
   executePayment,
 );
+
+router.get("/:id", auth, getPaymentStatusController);
 
 export default router;

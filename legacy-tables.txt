@@ -1,0 +1,19 @@
+ table_name | column_name |        data_type         | is_nullable |           column_default           
+------------+-------------+--------------------------+-------------+------------------------------------
+ issues     | id          | integer                  | NO          | nextval('issues_id_seq'::regclass)
+ issues     | title       | character varying        | NO          | 
+ issues     | description | text                     | NO          | 
+ issues     | type        | text                     | NO          | 
+ issues     | status      | text                     | NO          | 'open'::text
+ issues     | reporter_id | integer                  | NO          | 
+ issues     | created_at  | timestamp with time zone | NO          | now()
+ issues     | updated_at  | timestamp with time zone | NO          | now()
+ users      | id          | integer                  | NO          | nextval('users_id_seq'::regclass)
+ users      | name        | text                     | NO          | 
+ users      | email       | text                     | NO          | 
+ users      | password    | text                     | NO          | 
+ users      | role        | text                     | NO          | 'contributor'::text
+ users      | created_at  | timestamp with time zone | NO          | now()
+ users      | updated_at  | timestamp with time zone | NO          | now()
+(15 rows)
+

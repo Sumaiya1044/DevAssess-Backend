@@ -53,6 +53,7 @@ enum PaymentProvider {
 
 enum PaymentStatus {
   PENDING
+  PROCESSING
   PAID
   FAILED
   CANCELLED
@@ -82,6 +83,7 @@ model User {
   receivedInvitations Invitation[] @relation("InvitationCandidate")
 
   attempts            Attempt[]
+  submissions         Submission[]
   payments            Payment[]
   refreshTokens       RefreshToken[]
   auditLogs           AuditLog[]   @relation("AuditActor")
@@ -123,6 +125,7 @@ model CandidateProfile {
   createdAt TimestamptzString @default(now())
   updatedAt temporal.updatedAtString()
 
+  @@index([userId])
   user User @relation(fields: [userId], references: [id])
 }
 
@@ -155,6 +158,8 @@ model Assessment {
   @@index([createdById])
   @@index([status, createdAt])
   @@index([deletedAt])
+  @@index([createdAt])
+  @@index([status])
   @@map("assessment")
 }
 
@@ -222,6 +227,8 @@ model Invitation {
   @@unique([assessmentId, candidateId])
   @@index([candidateId, status])
   @@index([assessmentId, status])
+  @@index([expiresAt])
+  @@index([status])
   @@map("invitation")
 }
 
@@ -247,6 +254,8 @@ model Attempt {
   @@index([candidateId, status])
   @@index([assessmentId, status])
   @@index([createdAt])
+  @@index([expiresAt])
+  @@index([status])
   @@map("attempt")
 }
 
@@ -265,11 +274,12 @@ model Submission {
   submittedAt          TimestamptzString @default(now())
   evaluatedAt          TimestamptzString?
   createdAt            TimestamptzString @default(now())
-  updatedAt            TimestamptzString
+  updatedAt            TimestamptzString @default(now())
 
   attempt             Attempt            @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   assessmentQuestion  AssessmentQuestion @relation(fields: [assessmentQuestionId], references: [id], onDelete: Cascade)
   question            Question            @relation(fields: [questionId], references: [id])
+  candidate           User               @relation(fields: [candidateId], references: [id])
 
   @@unique([attemptId, assessmentQuestionId])
   @@index([attemptId])
@@ -302,6 +312,7 @@ model Payment {
   @@index([assessmentId])
   @@index([provider, status])
   @@index([createdAt])
+  @@index([status])
   @@map("payment")
 }
 
@@ -353,5 +364,31 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([action, createdAt])
   @@index([createdAt])
+  @@index([action])
   @@map("auditLog")
+}
+
+model LegacyUser {
+  id        Int               @id @default(autoincrement())
+  name      String
+  email     String            @unique
+  password  String
+  role      String            @default("contributor")
+  createdAt TimestamptzString @default(now()) @map("created_at")
+  updatedAt TimestamptzString @map("updated_at")
+
+  @@map("users")
+}
+
+model Issue {
+  id          Int               @id @default(autoincrement())
+  title       VarChar(150)
+  description String
+  type        String
+  status      String            @default("open")
+  reporterId  Int               @map("reporter_id")
+  createdAt   TimestamptzString @default(now()) @map("created_at")
+  updatedAt   TimestamptzString @default(now()) @map("updated_at")
+
+  @@map("issues")
 }

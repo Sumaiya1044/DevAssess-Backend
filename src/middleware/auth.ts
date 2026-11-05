@@ -1,5 +1,6 @@
+
 import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 export type UserRole = "ADMIN" | "COMPANY" | "CANDIDATE";
 
@@ -24,21 +25,39 @@ const auth = (
     if (!authorization) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized",
+        message: "Authorization header is required",
         errors: [],
       });
     }
 
     if (!authorization.startsWith("Bearer ")) {
-      return res.status(401).json({ success: false, message: "Bearer token is required", errors: [] });
+      return res.status(401).json({
+        success: false,
+        message: "Bearer token is required",
+        errors: [],
+      });
     }
 
-    const token = authorization.slice(7);
+    const token = authorization.slice(7).trim();
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Bearer token is required",
+        errors: [],
+      });
+    }
 
     const secret = process.env.JWT_ACCESS_SECRET;
 
     if (!secret) {
-      throw new Error("JWT_ACCESS_SECRET is not configured");
+      console.error("JWT_ACCESS_SECRET is not configured");
+
+      return res.status(500).json({
+        success: false,
+        message: "Authentication configuration error",
+        errors: [],
+      });
     }
 
     const decoded = jwt.verify(token, secret);
@@ -46,9 +65,11 @@ const auth = (
     if (
       typeof decoded !== "object" ||
       decoded === null ||
-      typeof decoded.id !== "number" ||
-      typeof decoded.name !== "string" ||
-      (decoded.role !== "ADMIN" && decoded.role !== "COMPANY" && decoded.role !== "CANDIDATE")
+      typeof (decoded as JwtPayload).id !== "number" ||
+      typeof (decoded as JwtPayload).name !== "string" ||
+      !["ADMIN", "COMPANY", "CANDIDATE"].includes(
+        String((decoded as JwtPayload).role),
+      )
     ) {
       return res.status(401).json({
         success: false,
@@ -57,17 +78,37 @@ const auth = (
       });
     }
 
+    const payload = decoded as JwtPayload;
+
     req.user = {
-      id: decoded.id,
-      name: decoded.name,
-      role: decoded.role,
+      id: payload.id as number,
+      name: payload.name as string,
+      role: payload.role as UserRole,
     };
 
     next();
-  } catch {
-    return res.status(401).json({
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      return res.status(401).json({
+        success: false,
+        message: "JWT token has expired. Please login again.",
+        errors: [],
+      });
+    }
+
+    if (error instanceof jwt.JsonWebTokenError) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid JWT token",
+        errors: [],
+      });
+    }
+
+    console.error("Authentication middleware error");
+
+    return res.status(500).json({
       success: false,
-      message: "Invalid or expired JWT token",
+      message: "Internal server error",
       errors: [],
     });
   }
