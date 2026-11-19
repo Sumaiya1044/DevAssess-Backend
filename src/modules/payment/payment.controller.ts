@@ -3,6 +3,7 @@ import {
   createBkashPayment,
   executeBkashPayment,
   getPaymentStatus,
+  handleBkashCallback,
 } from "./payment.service.js";
 import type { AuthenticatedRequest } from "../../middleware/auth.js";
 
@@ -147,6 +148,62 @@ export const getPaymentStatusController = async (
       success: false,
       message: "Could not retrieve payment status",
       errors: [message],
+    });
+  }
+};
+
+
+export const bkashCallback = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const paymentID = req.query.paymentID;
+    const status = req.query.status;
+
+    if (
+      typeof paymentID !== "string" ||
+      typeof status !== "string"
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid bKash callback parameters",
+        errors: [],
+      });
+    }
+
+    const callbackStatus = status.toLowerCase();
+
+    if (callbackStatus === "failure" || callbackStatus === "cancel") {
+      // Do not trust an unsigned callback to change payment status.
+      return res.status(200).json({
+        success: true,
+        message: "Payment was not completed",
+      });
+    }
+
+    if (callbackStatus !== "success") {
+      return res.status(400).json({
+        success: false,
+        message: "Unknown bKash callback status",
+        errors: [],
+      });
+    }
+
+    const payment = await handleBkashCallback(paymentID);
+
+    return res.status(200).json({
+      success: payment?.status === "PAID",
+      message: payment?.status === "PAID"
+        ? "bKash payment verified successfully"
+        : "Payment verification is pending",
+      data: payment,
+    });
+  } catch (error: unknown) {
+    return res.status(400).json({
+      success: false,
+      message: "bKash callback verification failed",
+      errors: [axiosErrorMessage(error)],
     });
   }
 };

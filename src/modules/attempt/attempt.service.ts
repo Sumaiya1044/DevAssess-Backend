@@ -33,6 +33,28 @@ const startAttempt = async (
     throw new AppError(400, "Only published assessments can be attempted");
   }
 
+  // Payment verification for paid assessments
+  if (Number(assessment.price) > 0) {
+    const payments = await db.orm.public.Payment
+      .where({
+        userId: candidateId,
+        assessmentId: payload.assessmentId,
+        provider: "BKASH",
+        status: "PAID",
+      })
+      .all();
+
+    const hasValidPayment = payments.some(
+      (payment) =>
+        Math.abs(Number(payment.amount) - Number(assessment.price)) < 0.001 &&
+        payment.currency === "BDT",
+    );
+
+    if (!hasValidPayment) {
+      throw new AppError(403, "Payment is required before starting this assessment");
+    }
+  }
+
   const now = Date.now();
 
   if (

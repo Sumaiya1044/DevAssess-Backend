@@ -58,7 +58,7 @@ const createAssessment = async (
     price: payload.price ?? 0,
   });
 
-  await redis.del(ASSESSMENT_CACHE_KEY);
+  if (redis.isReady) { try { await redis.del(ASSESSMENT_CACHE_KEY); } catch (error) { console.warn("Redis cache invalidation failed."); } }
 
   return assessment;
 };
@@ -207,7 +207,7 @@ const updateAssessment = async (
     throw new AppError(500, "Failed to update assessment");
   }
 
-  await redis.del(ASSESSMENT_CACHE_KEY);
+  if (redis.isReady) { try { await redis.del(ASSESSMENT_CACHE_KEY); } catch (error) { console.warn("Redis cache invalidation failed."); } }
 
   return updatedAssessment;
 };
@@ -246,7 +246,7 @@ const deleteAssessment = async (
     throw new AppError(500, "Failed to delete assessment");
   }
 
-  await redis.del(ASSESSMENT_CACHE_KEY);
+  if (redis.isReady) { try { await redis.del(ASSESSMENT_CACHE_KEY); } catch (error) { console.warn("Redis cache invalidation failed."); } }
 
   return null;
 };
@@ -301,7 +301,7 @@ const publishAssessment = async (
     throw new AppError(500, "Failed to publish assessment");
   }
 
-  await redis.del(ASSESSMENT_CACHE_KEY);
+  if (redis.isReady) { try { await redis.del(ASSESSMENT_CACHE_KEY); } catch (error) { console.warn("Redis cache invalidation failed."); } }
 
   return publishedAssessment;
 };

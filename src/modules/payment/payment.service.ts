@@ -225,6 +225,7 @@ export const executeBkashPayment = async (
   );
 
   const result = response.data;
+  console.log("BKASH EXECUTE RESPONSE:", JSON.stringify(result, null, 2));
   const gatewayAmount = Number(result.amount);
   const gatewayStatus = String(
     result.transactionStatus ?? "",
@@ -279,3 +280,34 @@ export const getPaymentStatus = async (
 
   return payment;
 };
+
+
+// Public callback: verify payment directly with bKash.
+export const handleBkashCallback = async (paymentID: string) => {
+  if (!paymentID?.trim()) {
+    throw new Error("Invalid bKash payment ID");
+  }
+
+  const payment = await db.orm.public.Payment
+    .where({
+      providerPaymentId: paymentID,
+      provider: "BKASH",
+    })
+    .first();
+
+  if (!payment) {
+    throw new Error("Payment not found for this callback");
+  }
+
+  if (payment.status === "PAID") {
+    return payment;
+  }
+
+  if (payment.status !== "PENDING") {
+    throw new Error("Payment is not pending");
+  }
+
+  // Execute API independently verifies the gateway transaction.
+  return executeBkashPayment(paymentID, payment.userId);
+}
+

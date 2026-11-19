@@ -5,6 +5,7 @@ import {
   initiatePayment,
   executePayment,
   getPaymentStatusController,
+  bkashCallback,
 } from "./payment.controller.js";
 import {
   initiatePaymentSchema,
@@ -27,6 +28,7 @@ router.post(
   executePayment,
 );
 
+router.get("/bkash/callback", bkashCallback);
 router.get("/:id", auth, getPaymentStatusController);
 
 export default router;
