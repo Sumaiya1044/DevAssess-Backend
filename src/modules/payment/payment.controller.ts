@@ -125,6 +125,10 @@ export const getPaymentStatusController = async (
       authReq.user.id,
     );
 
+    if (!payment) {
+      return res.status(404).json({ success: false, message: "Payment not found", errors: [] });
+    }
+
     return res.status(200).json({
       success: true,
       message: "Payment status retrieved successfully",

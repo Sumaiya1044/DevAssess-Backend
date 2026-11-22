@@ -1,5 +1,6 @@
 
 import axios from "axios";
+import { queryBkashPayment } from "./bkash.js";
 import { randomUUID } from "node:crypto";
 import { db } from "../../prisma/db.js";
 
@@ -262,27 +263,8 @@ export const executeBkashPayment = async (
     .first();
 };
 
-export const getPaymentStatus = async (
-  paymentId: number,
-  userId: number,
-) => {
-  const payment = await db.orm.public.Payment
-    .where({
-      id: paymentId,
-      userId,
-      provider: "BKASH",
-    })
-    .first();
+export const getPaymentStatus = async (paymentId: number, userId: number) => { const payment = await db.orm.public.Payment.where({id:paymentId,userId,provider:"BKASH"}).first(); if(!payment) throw new Error("Payment not found"); if(payment.status==="PAID") return payment; if(payment.status!=="PENDING"||!payment.providerPaymentId) return payment; const token=await getBkashToken(); const result=await queryBkashPayment(token,payment.providerPaymentId); console.log("BKASH PAYMENT QUERY RESULT:", JSON.stringify(result,null,2)); const amount=Number(result.amount); if(String(result.statusCode)!=="0000"||String(result.transactionStatus??"").toLowerCase()!=="completed"||!Number.isFinite(amount)||Math.abs(amount-Number(payment.amount))>0.001) return payment; await db.orm.public.Payment.where({id:payment.id,userId,status:"PENDING"}).update({status:"PAID",paidAt:new Date().toISOString(),metadata:{...(typeof payment.metadata==="object"&&payment.metadata!==null?payment.metadata:{}),gatewayQueryResponse:result}}); return db.orm.public.Payment.where({id:payment.id,userId}).first(); };
 
-  if (!payment) {
-    throw new Error("Payment not found");
-  }
-
-  return payment;
-};
-
-
-// Public callback: verify payment directly with bKash.
 export const handleBkashCallback = async (paymentID: string) => {
   if (!paymentID?.trim()) {
     throw new Error("Invalid bKash payment ID");
